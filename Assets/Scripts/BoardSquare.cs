@@ -9,6 +9,8 @@ public class BoardSquare : MonoBehaviour {
     //public BoardTerrain squareTerrain;
 
     private SpriteRenderer squareSprite;
+
+    public GameObject foundation;
     public string squareName;
     public float wood;
     public float stone;

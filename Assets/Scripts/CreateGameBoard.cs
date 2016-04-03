@@ -21,7 +21,7 @@ public class CreateGameBoard : MonoBehaviour
     private GameObject currentTile;
     public float maxCameraDistance = 50f;
     public float minCameraDistance = 5f;
-    public float cameraDistance = 25f;
+    public float cameraDistance = 10f;
     public float scrollSpeed = 2.0f;
 
     private Vector3 mousePosition = new Vector3();
@@ -38,7 +38,6 @@ public class CreateGameBoard : MonoBehaviour
         {
             bt = (BoardTerrain)g.GetComponent(typeof(BoardTerrain));
             tempTerrainName = bt.terrainName;
-            Debug.Log(tempTerrainName);
             terrainDictionary.Add(tempTerrainName, g);
         }
     }
@@ -62,6 +61,7 @@ public class CreateGameBoard : MonoBehaviour
         SpriteRenderer srTerrain;
         SpriteRenderer srSquare;
         int currentRnd;
+        string[] ruinMaterial = { "Marble", "Granite", "Obsidian", "Limestone", "Basalt", "Brownstone", "Flagstone", "Quadratum" };
 
         boardTile = new GameObject[tileSizeX,tileSizeY];
 
@@ -121,11 +121,18 @@ public class CreateGameBoard : MonoBehaviour
 
                 srSquare.sprite = srTerrain.sprite;
 
-                currentRnd = Mathf.CeilToInt(Random.value * 100 + .49f);
-                Debug.Log(currentRnd);
+                currentRnd = Mathf.CeilToInt(Random.value * 100+.49f);
                 if(currentRnd<3)
                 {
-                    Instantiate(foundationPrototype, new Vector3(i, j, 0), Quaternion.identity);
+                    GameObject tempObject = Instantiate(foundationPrototype, new Vector3(i, j, 0), Quaternion.identity) as GameObject;
+                    bs.foundation = tempObject;
+                    //foundationScript fs = tempObject.GetComponent<foundationScript>();
+                    currentRnd = Mathf.CeilToInt(Random.value * ruinMaterial.Length);
+                    Debug.Log("No Mats:"+ruinMaterial.Length + " Rnd:" + currentRnd);
+                    tempObject.SendMessage("RuinStart", ruinMaterial[currentRnd-1]);
+                    //fs.buildFlag = true;
+                    //fs.integrity = 50f;
+                    //fs.percentComplete = 20f;
                 }
             }
 
