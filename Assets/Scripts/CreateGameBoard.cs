@@ -13,7 +13,9 @@ public class CreateGameBoard : MonoBehaviour
 
     public GameObject squarePrototype;
     public GameObject[,] boardTile;
-    
+
+    public GameObject foundationPrototype;
+
     public Transform camTransform;
     public Camera camera1;
     private GameObject currentTile;
@@ -110,7 +112,7 @@ public class CreateGameBoard : MonoBehaviour
                 bs = (BoardSquare)boardTile[i, j].GetComponent(typeof(BoardSquare));
                 srSquare = (SpriteRenderer)boardTile[i, j].GetComponent(typeof(SpriteRenderer));
 
-                bs.name = bt.terrainName;
+                bs.squareName = bt.terrainName;
                 bs.wood = initializeResources(bt.averageWoodValue);
                 bs.stone = initializeResources(bt.averageStoneValue);
                 bs.food = initializeResources(bt.averageFoodValue);
@@ -118,6 +120,13 @@ public class CreateGameBoard : MonoBehaviour
                 bs.positionY = j;
 
                 srSquare.sprite = srTerrain.sprite;
+
+                currentRnd = Mathf.CeilToInt(Random.value * 100 + .49f);
+                Debug.Log(currentRnd);
+                if(currentRnd<3)
+                {
+                    Instantiate(foundationPrototype, new Vector3(i, j, 0), Quaternion.identity);
+                }
             }
 
         camera1.transform.position = new Vector3(tileSizeX / 2, tileSizeY / 2, -1);
@@ -166,7 +175,7 @@ public class CreateGameBoard : MonoBehaviour
         if (moveFlag)
         {
             camera1.transform.position -= moveDirection;
-            Debug.Log(moveDirection + " " + camera1.transform.position+" "+maxPositionX+" "+maxPositionY);
+            //Debug.Log(moveDirection + " " + camera1.transform.position+" "+maxPositionX+" "+maxPositionY);
             adjustCamera();
         }
     }
