@@ -121,7 +121,7 @@ public class CreateGameBoard : MonoBehaviour
 
     void createCastle()
     {
-        Vector3 startingPosition = camera1.transform.position;
+        Vector3 startingPosition = new Vector3(camera1.transform.position.x, camera1.transform.position.y,0);
         GameObject tempObject = Instantiate(playerCastle, startingPosition, Quaternion.identity) as GameObject;
         assignStructure(Mathf.RoundToInt(camera1.transform.position.x-1), Mathf.RoundToInt(camera1.transform.position.y-1), tempObject, true);
     }

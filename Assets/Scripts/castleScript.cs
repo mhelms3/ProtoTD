@@ -33,7 +33,9 @@ public class castleScript : MonoBehaviour {
                 aSlider.value = percentComplete;
             }
             else
-            { 
+            {
+                aSlider.enabled = false;
+            }
         }
         
 
