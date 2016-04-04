@@ -10,7 +10,9 @@ public class BoardSquare : MonoBehaviour {
 
     private SpriteRenderer squareSprite;
 
-    public GameObject foundation;
+    public GameObject foundation = null;
+    public GameObject structure = null;
+    public GameObject thisSquare = null;
     public string squareName;
     public float wood;
     public float stone;
@@ -19,16 +21,44 @@ public class BoardSquare : MonoBehaviour {
     public Slider WoodSlider;
     public Slider StoneSlider;
     public Slider FoodSlider;
+
+    public Slider aSlider;
+    public Text aText;
     //public specialItem[] specials;
 
     // Use this for initialization
-    void Start () {
-        
-        
-        
+    void UpdateStructurePanel()
+    {
+        GameObject temp = GameObject.Find("Health Slider");
+        if (temp != null)
+            aSlider = temp.GetComponent<Slider>();
+        aSlider.value = 0;
 
-        
-        
+       
+        temp = GameObject.Find("Construction Slider");
+        if (temp != null)
+            aSlider = temp.GetComponent<Slider>();
+        aSlider.value = 0;
+
+        temp = GameObject.Find("Structure Name");
+        if (temp != null)
+            aText = temp.GetComponent<Text>();
+        aText.text = "No structure here";
+
+        temp = GameObject.Find("Materials Label");
+        if (temp != null)
+            aText = temp.GetComponent<Text>();
+        aText.text = "";
+
+        temp = GameObject.Find("Special Properties");
+        if (temp != null)
+            aText = temp.GetComponent<Text>();
+        aText.text = "";
+
+        //Debug.Log("Position["+positionX+"," + positionY +"] Name:"+squareName+" W:"+wood +" S:"+ stone +" F:"+ food);
+    }
+
+    void Start () {
     }
 
     void OnMouseDown()
@@ -49,6 +79,23 @@ public class BoardSquare : MonoBehaviour {
         if (temp != null)
             FoodSlider = temp.GetComponent<Slider>();
         FoodSlider.value = food;
+
+
+        if (structure != null)
+        {
+            Debug.Log("Structure Name"+structure.name);
+            structure.SendMessage("UpdateStructurePanel");
+        }
+        else if (foundation != null)
+        {
+            foundation.SendMessage("UpdateStructurePanel");
+        }
+        else
+        {
+            UpdateStructurePanel();
+        }
+
+
         
         Debug.Log("Position["+positionX+"," + positionY +"] Name:"+squareName+" W:"+wood +" S:"+ stone +" F:"+ food);
     }

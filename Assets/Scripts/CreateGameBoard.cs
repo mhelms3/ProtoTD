@@ -1,8 +1,24 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.UI;
+
 
 public class CreateGameBoard : MonoBehaviour
 {
+    public int difficultySetting;
+    public string playerRace;
+    public int playerLevel;
+
+    public float playerWood;
+    public float playerStone;
+    public float playerFood;
+
+    public Text playerWoodText;
+    public Text playerStoneText;
+    public Text playerFoodText;
+    public Text playerRaceText;
+    public Text playerLevelText;
+
     public int tileSizeX;
     public int tileSizeY;
     private float currentRnd = 0;
@@ -15,6 +31,10 @@ public class CreateGameBoard : MonoBehaviour
     public GameObject[,] boardTile;
 
     public GameObject foundationPrototype;
+
+    public GameObject playerCastle;
+
+    
 
     public Transform camTransform;
     public Camera camera1;
@@ -48,12 +68,67 @@ public class CreateGameBoard : MonoBehaviour
         return newValue;
     }
 
-    void Start()
+    void initializePlayer()
     {
+        float baseResources = (5 - difficultySetting) * 200;
+        if (baseResources < 0)
+            baseResources = 0;
+        playerWood = 100 + baseResources;
+        playerStone = 100 + baseResources;
+        playerFood = 100 + baseResources;
 
+        if (playerRace == "Dwarf")
+            playerStone += 200;
+        else if (playerRace == "Elf")
+            playerWood += 200;
+        else if (playerRace == "Gnome")
+            playerFood += 200;
+        else if (playerRace == "Human")
+        {
+            playerWood += 50;
+            playerStone += 50;
+            playerFood += 50;
+        }
+    }
+
+    void updateLevelText()
+    {
+        playerLevelText.text = "Level "+ playerLevel.ToString();
+    }
+
+    void updateResourceText()
+    {
+        playerWoodText.text = playerWood.ToString();
+        playerStoneText.text = playerStone.ToString();
+        playerFoodText.text = playerFood.ToString();
+    }
+
+    void assignStructure(int x, int y, GameObject g, bool overwrite)
+    {
+        GameObject tile = boardTile[x, y];
+        BoardSquare thisSquare = (BoardSquare)tile.GetComponent(typeof(BoardSquare));
+        if (thisSquare.structure == null)
+            thisSquare.structure = g;
+        else if (overwrite)
+        {
+            Destroy(thisSquare.structure);
+            Debug.Log("Structure Destroyed by Overwrite");
+            thisSquare.structure = g;
+        }
+        else
+            Debug.Log("Overloaded Structure Error");
+    }
+
+    void createCastle()
+    {
+        Vector3 startingPosition = camera1.transform.position;
+        GameObject tempObject = Instantiate(playerCastle, startingPosition, Quaternion.identity) as GameObject;
+        assignStructure(Mathf.RoundToInt(camera1.transform.position.x-1), Mathf.RoundToInt(camera1.transform.position.y-1), tempObject, true);
+    }
+
+    void initializeGameBoard()
+    {
         initializeTerrainDictionary();
-        maxPositionX = tileSizeX - cameraDistance;
-        maxPositionY = tileSizeY - (cameraDistance * 0.9f);
         string tempTile;
         GameObject currentTerrain;
         BoardTerrain bt;
@@ -63,12 +138,12 @@ public class CreateGameBoard : MonoBehaviour
         int currentRnd;
         string[] ruinMaterial = { "Marble", "Granite", "Obsidian", "Limestone", "Basalt", "Brownstone", "Flagstone", "Quadratum" };
 
-        boardTile = new GameObject[tileSizeX,tileSizeY];
+        boardTile = new GameObject[tileSizeX, tileSizeY];
 
         for (int i = 0; i < tileSizeX; i++)
             for (int j = 0; j < tileSizeY; j++)
             {
-                currentRnd = Mathf.CeilToInt(Random.value * 9 +.49f);
+                currentRnd = Mathf.CeilToInt(Random.value * 9 + .49f);
                 switch (currentRnd)
                 {
                     case 1:
@@ -104,11 +179,11 @@ public class CreateGameBoard : MonoBehaviour
                 }
 
                 currentTerrain = terrainDictionary[tempTile];
-                
+
                 bt = (BoardTerrain)currentTerrain.GetComponent(typeof(BoardTerrain));
                 srTerrain = (SpriteRenderer)currentTerrain.GetComponent(typeof(SpriteRenderer));
 
-                boardTile[i,j] = Instantiate(squarePrototype, new Vector3(i, j, 0), Quaternion.identity) as GameObject;
+                boardTile[i, j] = Instantiate(squarePrototype, new Vector3(i + 1, j + 1, 0), Quaternion.identity) as GameObject;
                 bs = (BoardSquare)boardTile[i, j].GetComponent(typeof(BoardSquare));
                 srSquare = (SpriteRenderer)boardTile[i, j].GetComponent(typeof(SpriteRenderer));
 
@@ -121,41 +196,71 @@ public class CreateGameBoard : MonoBehaviour
 
                 srSquare.sprite = srTerrain.sprite;
 
-                currentRnd = Mathf.CeilToInt(Random.value * 100+.49f);
-                if(currentRnd<3)
+                currentRnd = Mathf.CeilToInt(Random.value * 100 + .49f);
+                if (currentRnd < 3)
                 {
-                    GameObject tempObject = Instantiate(foundationPrototype, new Vector3(i, j, 0), Quaternion.identity) as GameObject;
+                    GameObject tempObject = Instantiate(foundationPrototype, new Vector3(i + 1, j + 1, 0), Quaternion.identity) as GameObject;
                     bs.foundation = tempObject;
                     //foundationScript fs = tempObject.GetComponent<foundationScript>();
                     currentRnd = Mathf.CeilToInt(Random.value * ruinMaterial.Length);
-                    Debug.Log("No Mats:"+ruinMaterial.Length + " Rnd:" + currentRnd);
-                    tempObject.SendMessage("RuinStart", ruinMaterial[currentRnd-1]);
-                    //fs.buildFlag = true;
-                    //fs.integrity = 50f;
-                    //fs.percentComplete = 20f;
+                    //Debug.Log("No Mats:"+ruinMaterial.Length + " Rnd:" + currentRnd);
+                    tempObject.SendMessage("RuinStart", ruinMaterial[currentRnd - 1]);
+                    tempObject.SendMessage("SquareAssignment", bs);
                 }
             }
+    }
 
+    void Awake()
+
+    {
+        initializePlayer();
+        updateResourceText();
+        playerRaceText.text = playerRace;
+        initializeGameBoard();
         camera1.transform.position = new Vector3(tileSizeX / 2, tileSizeY / 2, -1);
         camera1.orthographicSize = cameraDistance;
+        createCastle();
+        
+
+
+    }
+
+    void Start()
+    {
 
     }
 
     void adjustCamera()
     {
+        float height = (camera1.orthographicSize * 2.0f);
+        float width = height * Screen.width / Screen.height;
 
-        if (camera1.transform.position.x > maxPositionX)
-            camera1.transform.position = new Vector3(maxPositionX, camera1.transform.position.y, camera1.transform.position.z);
-        if (camera1.transform.position.y > maxPositionY)
-            camera1.transform.position = new Vector3(camera1.transform.position.x, maxPositionY, camera1.transform.position.z);
-        if (camera1.transform.position.x < cameraDistance)
-            camera1.transform.position = new Vector3(cameraDistance, camera1.transform.position.y, camera1.transform.position.z);
-        if (camera1.transform.position.y < cameraDistance * 0.9f)
-            camera1.transform.position = new Vector3(camera1.transform.position.x, cameraDistance * 0.9f, camera1.transform.position.z);
+        float maxX = tileSizeX-width/2+7;
+        float minX = width/2;
+
+        float maxY = tileSizeY - height / 2;
+        float minY = height/2;
+
+
+        if (camera1.transform.position.x > maxX)
+            camera1.transform.position = new Vector3(maxX, camera1.transform.position.y, camera1.transform.position.z);
+
+        if (camera1.transform.position.y > maxY)
+            camera1.transform.position = new Vector3(camera1.transform.position.x, maxY, camera1.transform.position.z);
+
+        if (camera1.transform.position.x < minX)
+            camera1.transform.position = new Vector3(minX, camera1.transform.position.y, camera1.transform.position.z);
+
+        if (camera1.transform.position.y < minY)
+            camera1.transform.position = new Vector3(camera1.transform.position.x, minY, camera1.transform.position.z);
     }
     // Update is called once per frame
     void Update()
     {
+
+        playerWood += 1 * Time.deltaTime;
+        playerStone += 1 * Time.deltaTime;
+        playerFood += 1 * Time.deltaTime;
 
         if (Input.GetButtonDown("Fire1"))
         {
@@ -172,8 +277,8 @@ public class CreateGameBoard : MonoBehaviour
             cameraDistance += Input.GetAxis("Mouse ScrollWheel") * scrollSpeed;
             cameraDistance = Mathf.Clamp(cameraDistance, minCameraDistance, maxCameraDistance);
             camera1.orthographicSize = cameraDistance;
-            maxPositionX = tileSizeX - cameraDistance;
-            maxPositionY = tileSizeY - (cameraDistance*0.9f);
+            maxPositionX = tileSizeX - (cameraDistance*0.7f);
+            maxPositionY = tileSizeY - (cameraDistance*0.85f);
             adjustCamera();
         }
 
