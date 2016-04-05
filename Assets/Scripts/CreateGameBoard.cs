@@ -12,6 +12,7 @@ public class CreateGameBoard : MonoBehaviour
     public float playerWood;
     public float playerStone;
     public float playerFood;
+    public float playerMarketValue;
 
     public Text playerWoodText;
     public Text playerStoneText;
@@ -21,7 +22,9 @@ public class CreateGameBoard : MonoBehaviour
 
     public int tileSizeX;
     public int tileSizeY;
-    private float currentRnd = 0;
+    public int startingPositionX;
+    public int startingPositionY;
+    //private float currentRnd = 0;
     private int x, y;    
 
     public GameObject[] terrainTiles;
@@ -31,20 +34,16 @@ public class CreateGameBoard : MonoBehaviour
     public GameObject[,] boardTile;
 
     public GameObject foundationPrototype;
+    public GameObject ruinsPrototype;
 
     public GameObject playerCastle;
+    public Vector3 home; //keep
 
     
 
-    public Transform camTransform;
-    public Camera camera1;
-    private GameObject currentTile;
-    public float maxCameraDistance = 50f;
-    public float minCameraDistance = 5f;
-    public float cameraDistance = 10f;
-    public float scrollSpeed = 2.0f;
+    
 
-    private Vector3 mousePosition = new Vector3();
+    //private Vector3 mousePosition = new Vector3();
     private Vector3 moveDirection = new Vector3();
     private bool moveFlag = false;
     private float maxPositionX;
@@ -119,11 +118,25 @@ public class CreateGameBoard : MonoBehaviour
             Debug.Log("Overloaded Structure Error");
     }
 
+    void addMarketValue(float v)
+    {
+        playerMarketValue += v;
+        //add some cha-ching effect here, and highlight additional market value
+    }
     void createCastle()
     {
-        Vector3 startingPosition = new Vector3(camera1.transform.position.x, camera1.transform.position.y,0);
+        Vector3 startingPosition = new Vector3(startingPositionX, startingPositionY,0);
         GameObject tempObject = Instantiate(playerCastle, startingPosition, Quaternion.identity) as GameObject;
-        assignStructure(Mathf.RoundToInt(camera1.transform.position.x-1), Mathf.RoundToInt(camera1.transform.position.y-1), tempObject, true);
+        StructureBehavior sb = (StructureBehavior)tempObject.GetComponent(typeof(StructureBehavior));
+        sb.foundationMaterial = "Granite";
+        sb.structureMaterial = "Granite";
+        sb.SendMessage("updateStructureName");
+        sb.marketValue = 100;
+        assignStructure(Mathf.RoundToInt(startingPositionX-1), Mathf.RoundToInt(startingPositionY-1), tempObject, true);        
+        addMarketValue(100);
+        home = new Vector3(startingPositionX, startingPositionY, -1);
+        
+        Debug.Log(home);
     }
 
     void initializeGameBoard()
@@ -199,11 +212,9 @@ public class CreateGameBoard : MonoBehaviour
                 currentRnd = Mathf.CeilToInt(Random.value * 100 + .49f);
                 if (currentRnd < 3)
                 {
-                    GameObject tempObject = Instantiate(foundationPrototype, new Vector3(i + 1, j + 1, 0), Quaternion.identity) as GameObject;
+                    GameObject tempObject = Instantiate(ruinsPrototype, new Vector3(i + 1, j + 1, 0), Quaternion.identity) as GameObject;
                     bs.foundation = tempObject;
-                    //foundationScript fs = tempObject.GetComponent<foundationScript>();
-                    currentRnd = Mathf.CeilToInt(Random.value * ruinMaterial.Length);
-                    //Debug.Log("No Mats:"+ruinMaterial.Length + " Rnd:" + currentRnd);
+                    currentRnd = Mathf.CeilToInt(Random.value * ruinMaterial.Length);                    
                     tempObject.SendMessage("RuinStart", ruinMaterial[currentRnd - 1]);
                     tempObject.SendMessage("SquareAssignment", bs);
                 }
@@ -217,11 +228,7 @@ public class CreateGameBoard : MonoBehaviour
         updateResourceText();
         playerRaceText.text = playerRace;
         initializeGameBoard();
-        camera1.transform.position = new Vector3(tileSizeX / 2, tileSizeY / 2, -1);
-        camera1.orthographicSize = cameraDistance;
         createCastle();
-        
-
 
     }
 
@@ -230,65 +237,12 @@ public class CreateGameBoard : MonoBehaviour
 
     }
 
-    void adjustCamera()
-    {
-        float height = (camera1.orthographicSize * 2.0f);
-        float width = height * Screen.width / Screen.height;
-
-        float maxX = tileSizeX-width/2+7;
-        float minX = width/2;
-
-        float maxY = tileSizeY - height / 2;
-        float minY = height/2;
-
-
-        if (camera1.transform.position.x > maxX)
-            camera1.transform.position = new Vector3(maxX, camera1.transform.position.y, camera1.transform.position.z);
-
-        if (camera1.transform.position.y > maxY)
-            camera1.transform.position = new Vector3(camera1.transform.position.x, maxY, camera1.transform.position.z);
-
-        if (camera1.transform.position.x < minX)
-            camera1.transform.position = new Vector3(minX, camera1.transform.position.y, camera1.transform.position.z);
-
-        if (camera1.transform.position.y < minY)
-            camera1.transform.position = new Vector3(camera1.transform.position.x, minY, camera1.transform.position.z);
-    }
+    
     // Update is called once per frame
     void Update()
     {
-
         playerWood += 1 * Time.deltaTime;
         playerStone += 1 * Time.deltaTime;
         playerFood += 1 * Time.deltaTime;
-
-        if (Input.GetButtonDown("Fire1"))
-        {
-            moveFlag = true;
-        }
-
-        if (Input.GetButtonUp("Fire1"))
-        {
-            moveFlag = false;
-        }
-
-        if (Input.GetAxis("Mouse ScrollWheel")!=0)
-        {
-            cameraDistance += Input.GetAxis("Mouse ScrollWheel") * scrollSpeed;
-            cameraDistance = Mathf.Clamp(cameraDistance, minCameraDistance, maxCameraDistance);
-            camera1.orthographicSize = cameraDistance;
-            maxPositionX = tileSizeX - (cameraDistance*0.7f);
-            maxPositionY = tileSizeY - (cameraDistance*0.85f);
-            adjustCamera();
-        }
-
-
-        moveDirection = new Vector3(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"), 0) * cameraDistance / 20;
-        if (moveFlag)
-        {
-            camera1.transform.position -= moveDirection;
-            //Debug.Log(moveDirection + " " + camera1.transform.position+" "+maxPositionX+" "+maxPositionY);
-            adjustCamera();
-        }
     }
 }

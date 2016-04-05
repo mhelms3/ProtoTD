@@ -48,7 +48,10 @@
      <Compile Include="Assets\Scripts\BoardSquare.cs" />
      <Compile Include="Assets\Scripts\BoardTerrain.cs" />
      <Compile Include="Assets\Scripts\CreateGameBoard.cs" />
+     <Compile Include="Assets\Scripts\StructureBehavior.cs" />
+     <Compile Include="Assets\Scripts\castleScript.cs" />
      <Compile Include="Assets\Scripts\foundationScript.cs" />
+     <Compile Include="Assets\cameraBehavior.cs" />
  <Reference Include="UnityEngine.UI">
  <HintPath>C:/Program Files/Unity/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
  </Reference>

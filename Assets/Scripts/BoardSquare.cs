@@ -6,7 +6,7 @@ public class BoardSquare : MonoBehaviour {
 
     public int positionX;
     public int positionY;
-    //public BoardTerrain squareTerrain;
+    public BoardTerrain squareTerrain;
 
     private SpriteRenderer squareSprite;
 
@@ -21,6 +21,7 @@ public class BoardSquare : MonoBehaviour {
     public Slider WoodSlider;
     public Slider StoneSlider;
     public Slider FoodSlider;
+    public Text terrainText;
 
     public Slider aSlider;
     public Text aText;
@@ -63,31 +64,58 @@ public class BoardSquare : MonoBehaviour {
 
     void OnMouseDown()
     {
-        
-        GameObject temp = GameObject.Find("Wood Slider");
-        if (temp != null)
-            WoodSlider = temp.GetComponent<Slider>();
-        WoodSlider.value = wood;
+        GameObject temp;
+        if (WoodSlider == null)
+        {
+            temp = GameObject.Find("Wood Slider");
+            if (temp != null)
+                WoodSlider = temp.GetComponent<Slider>();
+        }
 
-        temp = GameObject.Find("Stone Slider");
-        if (temp != null)
-            StoneSlider = temp.GetComponent<Slider>();
-        StoneSlider.value = stone;
+        if (WoodSlider != null)
+            WoodSlider.value = wood;
 
-        
-        temp = GameObject.Find("Food Slider");
-        if (temp != null)
-            FoodSlider = temp.GetComponent<Slider>();
-        FoodSlider.value = food;
+        if (StoneSlider == null)
+        {
+            temp = GameObject.Find("Stone Slider");
+            if (temp != null)
+                StoneSlider = temp.GetComponent<Slider>();
+        }
+
+        if (StoneSlider != null)
+            StoneSlider.value = stone;
+
+        if (FoodSlider == null)
+        {
+            temp = GameObject.Find("Food Slider");
+            if (temp != null)
+                FoodSlider = temp.GetComponent<Slider>();
+        }
+
+        if (FoodSlider != null)
+            FoodSlider.value = food;
+
+        if (terrainText == null)
+        {
+            temp = GameObject.Find("Terrain Name");
+            if (temp != null)
+                terrainText = temp.GetComponent<Text>();
+        }
+
+        if (terrainText != null)
+            terrainText.text = squareName;
+
+        //temp = GameObject.Find("");
 
 
         if (structure != null)
         {
-            Debug.Log("Structure Name"+structure.name);
+            Debug.Log("structure");
             structure.SendMessage("UpdateStructurePanel");
-        }
+        }       
         else if (foundation != null)
         {
+            Debug.Log("foundation");
             foundation.SendMessage("UpdateStructurePanel");
         }
         else
@@ -95,8 +123,6 @@ public class BoardSquare : MonoBehaviour {
             UpdateStructurePanel();
         }
 
-
-        
         Debug.Log("Position["+positionX+"," + positionY +"] Name:"+squareName+" W:"+wood +" S:"+ stone +" F:"+ food);
     }
     // Update is called once per frame
