@@ -1,0 +1,35 @@
+fileFormatVersion: 2
+guid: c981eaa0efdb9d14f8ef08bff28fe006
+labels:
+- Terrain
+timeCreated: 1460168810
+licenseType: Free
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences:
+  - tower: {fileID: 156500, guid: 1a8b254f788e2454498412bebf30d37d, type: 2}
+  - mill: {instanceID: 0}
+  - mine: {instanceID: 0}
+  - farm: {instanceID: 0}
+  - buildMenuPanel: {instanceID: 0}
+  - structureMenuPanel: {instanceID: 0}
+  - defaultMenuPanel: {instanceID: 0}
+  - buildMenuCG: {instanceID: 0}
+  - structureMenuCG: {instanceID: 0}
+  - defaultMenuCG: {instanceID: 0}
+  - playerWoodText: {instanceID: 0}
+  - playerStoneText: {instanceID: 0}
+  - playerFoodText: {instanceID: 0}
+  - playerRaceText: {instanceID: 0}
+  - playerLevelText: {instanceID: 0}
+  - squarePrototype: {instanceID: 0}
+  - selectorAnimation: {instanceID: 0}
+  - selector: {instanceID: 0}
+  - foundationPrototype: {instanceID: 0}
+  - ruinsPrototype: {instanceID: 0}
+  - playerCastle: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

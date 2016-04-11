@@ -12,19 +12,25 @@ public class StructureBehavior : MonoBehaviour {
     public float integrity;
 
     public bool buildFlag;
+    public bool hasDestroyOrder;
 
     public string structureName;
     public string buildingType;
+    public string buildingSubType;
     public BoardSquare homeSquare;
 
     public string structureMaterial;
     public string foundationMaterial;
 
+    public float woodCost;
+    public float stoneCost;
+
     public float marketValue;
+    public bool isSelected = false;
 
     public IList<string> specials = new List<string>();
 
-    bool isFoundationOnly;
+    //bool isFoundationOnly;
 
 
     SpriteRenderer[] barSprites;  //for healthbars
@@ -98,8 +104,7 @@ public class StructureBehavior : MonoBehaviour {
         percentComplete = 1;
         integrity = 1;
         buildFlag = false;
-        barSprites = this.GetComponentsInChildren<SpriteRenderer>();
-        updateStructureName();
+        barSprites = this.GetComponentsInChildren<SpriteRenderer>();        
     }
 
     void updateStructureName()
@@ -108,8 +113,10 @@ public class StructureBehavior : MonoBehaviour {
             structureName = foundationMaterial + " Foundation";
         else if(buildingType == "Ruin")
             structureName = foundationMaterial + " Ruin";
+        else if(buildingSubType == null || buildingSubType == "")
+            structureName = structureMaterial + " " + buildingType + "(" + foundationMaterial + "[F])";
         else
-            structureName = structureMaterial + " " + buildingType + "(" + foundationMaterial + " Foundation)";
+             structureName = structureMaterial + " " + buildingType + ", " + buildingSubType + "(" + foundationMaterial + "[F])";
     }
 
     void updateMaterialType(string s, bool isFoundation)
@@ -129,13 +136,13 @@ public class StructureBehavior : MonoBehaviour {
         {
             if (c.name == "HealthBar")
             {
-                if (percentComplete > 66)
+                if (integrity > 66)
                     c.color = Color.green;
-                else if (percentComplete > 33)
+                else if (integrity > 33)
                     c.color = Color.yellow;
                 else
                     c.color = Color.red;
-                c.transform.localScale = new Vector3(percentComplete / 100, 1, 1);
+                c.transform.localScale = new Vector3(integrity / 100, 1, 1);
             }
             if (c.name == "BuildBar")
             {
@@ -154,11 +161,51 @@ public class StructureBehavior : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-	
-	}
-	
-	// Update is called once per frame
-	void Update () {
+        updateStructureName();
+        hasDestroyOrder = false;
+    }
+
+    void refund(float percentRefund, gameBoard cgb)
+    {
+        //give player resources back
+        cgb.playerWood += percentRefund * woodCost;
+        cgb.playerStone += percentRefund * stoneCost;
+    }
+
+    void freeWorkers(gameBoard cgb)
+    {
+        if (buildingType == "Mine")
+        {
+            mineBehavior buildingBehavior = gameObject.GetComponent<mineBehavior>();
+            cgb.playerWorkers += buildingBehavior.workers;
+
+        }
+        else if (buildingType == "Mill")
+        {
+            //millBehavior buildingBehavior = gameObject.GetComponent<millBehavior>();     
+            //cgb.playerWorkers += buildingBehavior.workers;
+        }
+        else if (buildingType == "Farm")
+        {
+            //millBehavior buildingBehavior = gameObject.GetComponent<millBehavior>(); 
+            //cgb.playerWorkers += buildingBehavior.workers;
+        }
+    }
+    
+    public void destroyThisStructure(gameBoard cgb)
+    {
+        cgb.SendMessage("popStructure", new Vector2(positionX, positionY));
+        if(isSelected)
+            cgb.SendMessage("openMenu", "Build");
+        cgb.SendMessage("getWalkableSquares");
+        cgb.SendMessage("enemyUpdate");        
+        Debug.Log("Destroying " + buildingType + " at [" + positionX + "," + positionY + "]");
+        Destroy(gameObject);
+    }
+
+    // Update is called once per frame
+    void Update () {
+
         if (percentComplete < 100 && buildFlag)
         {
             percentComplete += Time.deltaTime * workerSpeed;
@@ -170,8 +217,35 @@ public class StructureBehavior : MonoBehaviour {
                 integrity = percentComplete;
 
             updateStatusBars();
+            if(isSelected)
+                UpdateStructurePanel();
+        }
+
+        if (Input.GetKeyDown(KeyCode.Backspace) && isSelected)
+        {
+            gameBoard cgb = (gameBoard)FindObjectOfType(typeof(gameBoard));
+            if (buildingType != "Castle")
+            {
+                float refundPercentage = 1.00f;
+                if (!buildFlag)
+                    refundPercentage = .50f;                
+                refund(refundPercentage, cgb);
+                freeWorkers(cgb);
+                destroyThisStructure(cgb);
+            }
+            else
+            {
+                Debug.Log("DONT DESTROY YOUR OWN CASTLE!!!");
+            }
 
         }
 
+        if (integrity<0)
+        {
+            gameBoard cgb = (gameBoard)FindObjectOfType(typeof(gameBoard));
+            if (!hasDestroyOrder)
+                destroyThisStructure(cgb);
+            hasDestroyOrder = true;
+        }
     }
 }

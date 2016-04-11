@@ -10,7 +10,7 @@ public class foundationScript : MonoBehaviour {
     void AddMaterialSpecials (string s)
     {
 
-        string[] ruinMaterial = { "Marble", "Granite", "Obsidian", "Limestone", "Basalt", "Brownstone", "Flagstone", "Quadratum" };
+        //string[] ruinMaterial = { "Marble", "Granite", "Obsidian", "Limestone", "Basalt", "Brownstone", "Flagstone", "Quadratum" };
         switch (s)
         {
             case "Marble":

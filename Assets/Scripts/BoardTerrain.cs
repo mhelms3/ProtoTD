@@ -6,7 +6,8 @@ public class BoardTerrain : MonoBehaviour {
     public int averageWoodValue;    //base resources   
     public int averageStoneValue;   //base resources
     public int averageFoodValue;    //base resources
-    
+    public float moveCost;          //base cost to move into square
+
     /*
     public float bonusWood;         //odds of finding a bonus resource of this type
     public float bonusStone;        //odds of finding a bonus resource of this type
@@ -16,7 +17,7 @@ public class BoardTerrain : MonoBehaviour {
     public float offenseValue;      //fighting from
     public float scryValue;         //base sight distance from
     public float obscureValue;      //odds of seeing something here
-    public float moveCost;          //base cost to move into square
+   
     public bool impassable_land;
     public bool impassable_air;
     public bool impassable_sea;
