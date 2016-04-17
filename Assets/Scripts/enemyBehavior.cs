@@ -10,47 +10,94 @@ public class enemyBehavior : MonoBehaviour {
     public float damage;
     public float attackCycle;
     public float attackSpeed;
+    private bool triggerDeathFlag = false;
     public Vector2 target;
     public GameObject targetObject;
 
     public List<BoardSquare> myPath;
     public string targetType;
+    public bool isConfounded; //use this if enemy cannot find path to closest target type
     public bool hasPath;
 
     public bool isAsleep;
     public float sleepCounter;
 
+    public int countPath = 0;
 
+    void killEnemy()
+    {
+        gameBoard cgb = (gameBoard)FindObjectOfType(typeof(gameBoard));
+        cgb.SendMessage("popEnemy", gameObject);
+        Destroy(gameObject);
+    }
+
+    void OnTriggerEnter2D(Collider2D col)
+    {
+        if (col.gameObject.tag == "Ammo")
+        {
+            //enemyBehavior enemyInfo = col.gameObject.GetComponent<enemyBehavior>();
+            ammoScript aScript = col.gameObject.GetComponent<ammoScript>();
+            float damage = Mathf.Round(Random.value * (aScript.damageUpper - aScript.damageLower) + aScript.damageLower);
+            hitPoints -= damage;
+            print("Hit for " + damage + " damage");
+            Destroy(col.gameObject);
+        }
+
+    }
 
     public void acquireTarget()
     {
+        //print("finding target");
         GameObject[] targetObjects = GameObject.FindGameObjectsWithTag(targetType);
         GameObject closest = null;
         float distance = Mathf.Infinity;
         Vector3 position = transform.position;
         foreach (GameObject go in targetObjects)
         {
+            //print("---checking target "+ go.name +" at " + go.transform.position);
             Vector3 diff = go.transform.position - position;
             float curDistance = diff.sqrMagnitude;
+            //print("---checking target " + go.name + " at " + go.transform.position + " distance:" + curDistance);
             if (curDistance < distance)
             {
                 closest = go;
                 distance = curDistance;
             }
         }
+        
+        if(closest == null && targetType != "Building")
+        {
+            targetObjects = GameObject.FindGameObjectsWithTag("Building");
+            foreach (GameObject go in targetObjects)
+            {
+                Vector3 diff = go.transform.position - position;
+                float curDistance = diff.sqrMagnitude;
+                if (curDistance < distance)
+                {
+                    closest = go;
+                    distance = curDistance;
+                }
+            }
+        }
+        
+        
 
         if (closest != null)
         {
             target.x = closest.transform.position.x;
             target.y = closest.transform.position.y;
-            Debug.Log("MyTarget:" + closest.transform.position + " Target:" + target);
+            //Debug.Log("MyTarget:" + closest.transform.position + " Target:" + target);
             targetObject = closest;
         }
         else
         {
+            print("Failed to find Target!!!");
             target.x = position.x;
             target.y = position.y;
             targetObject = null;
+            Application.Quit();
+
+
         }
     }
 
@@ -74,12 +121,12 @@ public class enemyBehavior : MonoBehaviour {
         passVectors[0] = currentPosition;
         target.x = targetObject.transform.position.x;
         target.y = targetObject.transform.position.y;
-        Debug.Log(" Target:" + target);
+        
         passVectors[1] = target;
         passVectors[2] = gameObject;
 
+        //Debug.Log(" Target:" + target);
         pfs.SendMessage("FindPathVectors", passVectors);
-        //myPath = pfs.finalPath;        
     }
 
     public void moveToTarget()
@@ -98,7 +145,7 @@ public class enemyBehavior : MonoBehaviour {
         Vector3 position = transform.position;
         Vector3 diff = targetObject.transform.position - position;
         float curDistance = diff.sqrMagnitude;
-        if (curDistance < attackRange)
+        if (curDistance < (attackRange*1.42))
         {
             attackTarget();
         }
@@ -142,8 +189,9 @@ public class enemyBehavior : MonoBehaviour {
 
         if (targetObject == null && !isAsleep)
         {
-            print("acquiring new target");
+            //print("acquiring new target");
             hasPath = false;
+            myPath.Clear();
             acquireTarget();
             if (targetObject == null)
             {
@@ -157,6 +205,16 @@ public class enemyBehavior : MonoBehaviour {
             if(!hasPath)
                     findPath();
             engageTarget();
+        }
+
+        if(hitPoints<0)
+        {
+            triggerDeathFlag = true;
+        }
+
+        if(triggerDeathFlag)
+        {
+            killEnemy();
         }
 	
 	}

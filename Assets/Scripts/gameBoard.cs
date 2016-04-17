@@ -4,6 +4,7 @@ using UnityEngine.UI;
 
 public class gameBoard : MonoBehaviour
 {
+    public int startingEnemies;
     public int difficultySetting;
     public string playerRace;
     public int playerLevel;
@@ -40,7 +41,10 @@ public class gameBoard : MonoBehaviour
     public int tileSizeY;
     public int startingPositionX;
     public int startingPositionY;
- 
+
+    public bool currentWalkability = false;
+    public bool currentEnemy = false;
+
 
     public GameObject[] terrainTiles;
     private IDictionary<string, GameObject> terrainDictionary = new Dictionary<string, GameObject>();
@@ -62,7 +66,8 @@ public class gameBoard : MonoBehaviour
     public bool structureMenuFlag = false;
     public bool defaultMenuFlag = true;
 
-    public GameObject[] enemies;
+    public GameObject[] enemyType;
+    public List<GameObject> enemies = new List<GameObject>();
 
 
 
@@ -96,9 +101,9 @@ public class gameBoard : MonoBehaviour
         float baseResources = (5 - difficultySetting) * 200;
         if (baseResources < 0)
             baseResources = 0;
-        playerWood = 100 + baseResources;
-        playerStone = 100 + baseResources;
-        playerFood = 100 + baseResources;
+        playerWood = 3000 + baseResources;
+        playerStone = 3000 + baseResources;
+        playerFood = 3000 + baseResources;
 
         if (playerRace == "Dwarf")
             playerStone += 200;
@@ -261,6 +266,39 @@ public class gameBoard : MonoBehaviour
             }
     }
 
+    public void popEnemy(GameObject e)
+    {
+        print("Enemy# " + enemies.Count);
+        enemies.Remove(e);
+        print("Enemy new # " + enemies.Count);
+    }
+
+    void spawnEnemies()
+    {
+        float xPo, yPo;
+        GameObject eGo;
+        for(int i=0; i<startingEnemies; i++)
+        {
+            xPo = Random.value * 15 +5;
+            yPo = Random.value * 15 +5;
+            eGo = Instantiate(enemyType[0], new Vector3(xPo, yPo, 1), Quaternion.identity) as GameObject;
+            enemies.Add(eGo);
+        }
+        print("Enemy# " + enemies.Count);
+    }
+
+    public void enemyUpdate()
+    {
+
+        foreach (GameObject e in enemies)
+        {
+            print("updating enemies");
+            e.SendMessage("acquireTarget");
+            e.SendMessage("findPath");
+        }
+        currentEnemy = true;
+    }
+
     void initializeNewStructure(StructureBehavior sb)
     {
         sb.positionX = Mathf.FloorToInt(selectedTile.x);
@@ -268,7 +306,6 @@ public class gameBoard : MonoBehaviour
         sb.workerSpeed = playerBuildSpeed;
         sb.integrity = 1;
         sb.percentComplete = 1;
-        sb.buildFlag = true;
         sb.structureMaterial = "Wood";
         sb.foundationMaterial = "Stone";
         sb.buildFlag = true;
@@ -299,15 +336,15 @@ public class gameBoard : MonoBehaviour
             StructureBehavior sb = (StructureBehavior)thisTower.GetComponent(typeof(StructureBehavior));
             initializeNewStructure(sb);
             sb.buildingType = "Tower";
-            sb.buildingType = subType;
+            sb.buildingSubType = subType;
             sb.woodCost = 200;
             sb.stoneCost = 200;
             playerWood -= 200;
             playerStone -= 200;            
             Debug.Log("Tower Built at "+currentLocation);
             openMenu("Structure");
-            getWalkableSquares();
-            enemyUpdate();
+            currentWalkability = false;
+            currentEnemy = false;           
         }
         else
         {
@@ -319,15 +356,7 @@ public class gameBoard : MonoBehaviour
 
     }
 
-    public void enemyUpdate()
-    {
-        foreach (GameObject e in enemies)
-        {
-            e.SendMessage("acquireTarget");
-            e.SendMessage("findPath");
-        }
-    }
-
+   
     void buildArrowTower()
     {
         buildTower("Arrow");
@@ -393,17 +422,31 @@ public class gameBoard : MonoBehaviour
 
     void getWalkableSquares()
     {
+        print("updating walkability");
         foreach (GameObject go in boardTile)
         {
+            int layerMask = 1 << 8;
             BoardSquare b = go.GetComponent<BoardSquare>();
             Vector3 checkArea = new Vector3(b.positionX+.5f, b.positionY-.5f, 0);            
-            b.isWalkable = !(Physics.CheckBox(checkArea, Vector3.one*.2f));
+            b.isWalkable = !(Physics.CheckBox(checkArea, Vector3.one*.2f, Quaternion.identity, layerMask));
+            
             
         }
+        currentWalkability = true;
     }
 
-    
-    
+    void setWalkableCheck()
+    {
+        if (currentWalkability)
+            currentWalkability = false;
+    }
+
+    void setEnemyCheck()
+    {
+        if (currentEnemy)
+            currentEnemy = false;
+    }
+
     void OnDrawGizmos()
     {
         List<BoardSquare> bs = new List<BoardSquare>();
@@ -483,6 +526,8 @@ public class gameBoard : MonoBehaviour
         createCastle();
         initializeGUI();
         getWalkableSquares();
+        spawnEnemies();
+        enemyUpdate();
     }
     
     private void updateMarketIncome()
@@ -512,6 +557,20 @@ public class gameBoard : MonoBehaviour
         }
     }
     // Update is called once per frame
+
+    void LateUpdate()
+    {
+        if (!currentWalkability)
+        {
+            getWalkableSquares();
+        }
+
+        if (!currentEnemy)
+        {
+            enemyUpdate();
+        }
+    }
+
     void Update()
     {
         updateMarketIncome();       

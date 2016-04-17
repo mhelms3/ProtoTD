@@ -101,9 +101,10 @@ public class StructureBehavior : MonoBehaviour {
     // Use this for initialization
     void Awake()
     {
-        percentComplete = 1;
-        integrity = 1;
-        buildFlag = false;
+        percentComplete = 99;
+        integrity = 99;
+        buildFlag = true;
+        workerSpeed = 25;
         barSprites = this.GetComponentsInChildren<SpriteRenderer>();        
     }
 
@@ -150,6 +151,12 @@ public class StructureBehavior : MonoBehaviour {
                 {                    
                     c.enabled = false;
                     buildFlag = false;
+                    if (buildingType == "Tower")
+                    {
+                        towerScript ts = gameObject.GetComponent<towerScript>();
+                        ts.isActive = true;
+                    }
+                        
                 }
                 else
                 {
@@ -192,16 +199,20 @@ public class StructureBehavior : MonoBehaviour {
         }
     }
     
-    public void destroyThisStructure(gameBoard cgb)
+
+    void destroyThis()
     {
-        cgb.SendMessage("popStructure", new Vector2(positionX, positionY));
-        if(isSelected)
-            cgb.SendMessage("openMenu", "Build");
-        cgb.SendMessage("getWalkableSquares");
-        cgb.SendMessage("enemyUpdate");        
-        Debug.Log("Destroying " + buildingType + " at [" + positionX + "," + positionY + "]");
+        //print("Death");
         Destroy(gameObject);
+        gameBoard cgb = (gameBoard)FindObjectOfType(typeof(gameBoard));
+        cgb.SendMessage("popStructure", new Vector2(positionX, positionY));
+        if (isSelected)
+            cgb.SendMessage("openMenu", "Build");
+        cgb.SendMessage("setWalkableCheck");
+        cgb.SendMessage("setEnemyCheck");
+        //Debug.Log("Destroying " + buildingType + " at [" + positionX + "," + positionY + "]");
     }
+   
 
     // Update is called once per frame
     void Update () {
@@ -209,8 +220,16 @@ public class StructureBehavior : MonoBehaviour {
         if (percentComplete < 100 && buildFlag)
         {
             percentComplete += Time.deltaTime * workerSpeed;
-            if (percentComplete > 100)
+            if (percentComplete >= 100)
+            {
                 percentComplete = 100;
+                if (buildingType == "Tower")
+                {
+                    print("TOWER COMPLETE -- ACTIVATING");
+                    towerScript ts = gameObject.GetComponent<towerScript>();
+                    ts.isActive = true;
+                }
+            }
 
             integrity += Time.deltaTime * workerSpeed;
             if (integrity > percentComplete)
@@ -231,7 +250,7 @@ public class StructureBehavior : MonoBehaviour {
                     refundPercentage = .50f;                
                 refund(refundPercentage, cgb);
                 freeWorkers(cgb);
-                destroyThisStructure(cgb);
+                destroyThis();
             }
             else
             {
@@ -242,9 +261,8 @@ public class StructureBehavior : MonoBehaviour {
 
         if (integrity<0)
         {
-            gameBoard cgb = (gameBoard)FindObjectOfType(typeof(gameBoard));
             if (!hasDestroyOrder)
-                destroyThisStructure(cgb);
+                destroyThis();
             hasDestroyOrder = true;
         }
     }

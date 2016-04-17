@@ -3,32 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 
-/*
-public class Node
-{
-    public int positionX;
-    public int positionY;
-    public float moveCost;
-    public bool isWalkable;
-
-    public float gcost;
-    public float hcost;
-    public Node parent;
-
-    public float fcost
-    {
-        get
-        {
-            return (gcost + hcost);
-        }
-    }
-}
-
-public class Grid
-{
-    Node[,] gridOfNodes;
-}
-*/
 public class pathFindingScript : MonoBehaviour {
 
     public BoardSquare[,] boardGrid;
@@ -52,7 +26,10 @@ public class pathFindingScript : MonoBehaviour {
         {
             for (int y = -1; y < 2; y++)
             {
-                if (y != 0 || x != 0)
+
+                //if (y != 0 || x != 0)
+
+                if (y == 0 || x == 0)
                 {
                     int newX = posX + x;
                     int newY = posY + y;
@@ -65,19 +42,21 @@ public class pathFindingScript : MonoBehaviour {
             }
         }
         
-       // print("Pos:" + posX + ", " + posY + "#neighbors:"+neighbors.Count);
+       //print("Pos:" + posX + ", " + posY + "#neighbors:"+neighbors.Count);
         return neighbors;
     }
 
     void FindPathVectors (object[] o)
-    {
+    {   
         
         Vector2 v1 = (Vector2)o[0];
         Vector2 v2 = (Vector2)o[1];
         GameObject go = (GameObject)o[2];
 
-        print("PFS Target" + v1.x+", " + v1.y);
-        print("PFS Destingation" + v2.x + ", " + v2.y);
+        //print("PFS Target" + v1.x+", " + v1.y);
+        //print("PFS Destingation" + v2.x + ", " + v2.y);
+        //print("PFS GameObject Name" + go.name +" Position:"+ go.transform.position);
+
         FindPath(v1, v2, go);
         
     }
@@ -94,9 +73,15 @@ public class pathFindingScript : MonoBehaviour {
 
     void FindPath (Vector2 _starting, Vector2 _end, GameObject mobileGO)
     {
-        
+        //print("FP Target" + _starting.x+", " + _starting.y);
+        //print("FP Destingation" + _end.x + ", " + _end.y);
+        //print("FP GameObject Name" + mobileGO.name +" Position:"+ mobileGO.transform.position);
+
         BoardSquare startNode = boardGrid[Mathf.FloorToInt(_starting.x), Mathf.CeilToInt(_starting.y)];
         BoardSquare endNode = boardGrid[Mathf.FloorToInt(_end.x), Mathf.CeilToInt(_end.y)];
+        
+        //print("Start Node (Target)" + startNode.positionX + ", " + startNode.positionY);
+        //print("End Node (Dest)" + endNode.positionX + ", " + endNode.positionY);
 
         List<BoardSquare> openSet = new List<BoardSquare>();
         HashSet<BoardSquare> closedSet = new HashSet<BoardSquare>();
@@ -104,6 +89,7 @@ public class pathFindingScript : MonoBehaviour {
 
         enemyBehavior eb = mobileGO.GetComponent<enemyBehavior>();
 
+        
         while (openSet.Count > 0)
         {
             BoardSquare currentNode = openSet[0];
@@ -112,18 +98,21 @@ public class pathFindingScript : MonoBehaviour {
                 if (openSet[i].fcost < currentNode.fcost || openSet[i].fcost == openSet[i].fcost && openSet[i].hcost < openSet[i].hcost)
                 {
                     currentNode = openSet[i];
+                     //print("Current Node X:" + currentNode.positionX + " Y:" + currentNode.positionY + " fCost"+currentNode.fcost);
                 }
             }
             openSet.Remove(currentNode);
             closedSet.Add(currentNode);
 
-            if (currentNode == endNode)
+            
+
+            if (checkDistanceOne(currentNode, endNode))
             {
                 finalPath = retracePath(currentNode, startNode);
                 eb.myPath = finalPath;
                 eb.hasPath = true;
                 clearBoardGrid();
-                Debug.Log("Path Success");
+                //Debug.Log("Path Success");
                 return;
             }
 
@@ -164,6 +153,14 @@ public class pathFindingScript : MonoBehaviour {
         return path;
     }
 
+
+    private bool checkDistanceOne (BoardSquare a, BoardSquare b)
+    {
+        if (getDistance(a, b) <= 14)
+            return true;
+        else
+            return false;
+    }
     private float getDistance(BoardSquare a, BoardSquare b)
     {
         float disX = Mathf.Abs(a.positionX - b.positionX);
