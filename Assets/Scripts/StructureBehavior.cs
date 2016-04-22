@@ -12,6 +12,7 @@ public class StructureBehavior : MonoBehaviour {
     public float integrity;
 
     public bool buildFlag;
+    public bool updatedButtonFlag;
     public bool hasDestroyOrder;
 
     public string structureName;
@@ -181,22 +182,8 @@ public class StructureBehavior : MonoBehaviour {
 
     void freeWorkers(gameBoard cgb)
     {
-        if (buildingType == "Mine")
-        {
-            mineBehavior buildingBehavior = gameObject.GetComponent<mineBehavior>();
-            cgb.playerWorkers += buildingBehavior.workers;
-
-        }
-        else if (buildingType == "Mill")
-        {
-            //millBehavior buildingBehavior = gameObject.GetComponent<millBehavior>();     
-            //cgb.playerWorkers += buildingBehavior.workers;
-        }
-        else if (buildingType == "Farm")
-        {
-            //millBehavior buildingBehavior = gameObject.GetComponent<millBehavior>(); 
-            //cgb.playerWorkers += buildingBehavior.workers;
-        }
+       resourceBuildingScript buildingScript = gameObject.GetComponent<resourceBuildingScript>();
+       cgb.playerWorkers += buildingScript.workers;
     }
     
 
@@ -206,6 +193,7 @@ public class StructureBehavior : MonoBehaviour {
         Destroy(gameObject);
         gameBoard cgb = (gameBoard)FindObjectOfType(typeof(gameBoard));
         cgb.SendMessage("popStructure", new Vector2(positionX, positionY));
+        cgb.SendMessage("deleteFromPlayerStructures", gameObject);
         if (isSelected)
             cgb.SendMessage("openMenu", "Build");
         cgb.SendMessage("setWalkableCheck");
@@ -213,9 +201,23 @@ public class StructureBehavior : MonoBehaviour {
         //Debug.Log("Destroying " + buildingType + " at [" + positionX + "," + positionY + "]");
     }
    
-
+    private void updateButtons()
+    {
+        //gameBoard cgb = (gameBoard)FindObjectOfType(typeof(gameBoard));
+        //cgb.SendMessage("updateButtonStatus", gameObject);
+    }
     // Update is called once per frame
     void Update () {
+
+        if(isSelected && !updatedButtonFlag)
+        {
+            updateButtons();
+            updatedButtonFlag = true;
+        }
+        else if(!isSelected && updatedButtonFlag)
+        {
+            updatedButtonFlag = false;
+        }
 
         if (percentComplete < 100 && buildFlag)
         {

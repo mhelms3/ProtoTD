@@ -130,7 +130,7 @@ public class BoardSquare : MonoBehaviour {
         {
             Debug.Log("structure");
             structure.SendMessage("UpdateStructurePanel");
-            cgb.SendMessage("openMenu", "Structure");
+            //cgb.SendMessage("openMenu", "Structure");
             StructureBehavior sb = structure.GetComponent<StructureBehavior>();
             sb.isSelected = true;
         }
@@ -138,12 +138,12 @@ public class BoardSquare : MonoBehaviour {
         {
             Debug.Log("foundation");
             foundation.SendMessage("UpdateStructurePanel");
-            cgb.SendMessage("openMenu", "Build");
+            //cgb.SendMessage("openMenu", "Build");
         }
         else
         {
             UpdateStructurePanel();
-            cgb.SendMessage("openMenu", "Build");
+            //cgb.SendMessage("openMenu", "Build");
         }
 
         cgb.SendMessage("deselectCurrentStructure");

@@ -10,6 +10,10 @@ public class enemyBehavior : MonoBehaviour {
     public float damage;
     public float attackCycle;
     public float attackSpeed;
+
+    public float reaquireFrequency;
+    public float reaquireClock = 0;
+
     private bool triggerDeathFlag = false;
     public Vector2 target;
     public GameObject targetObject;
@@ -18,7 +22,6 @@ public class enemyBehavior : MonoBehaviour {
     public string targetType;
     public bool isConfounded; //use this if enemy cannot find path to closest target type
     public bool hasPath;
-
     public bool isAsleep;
     public float sleepCounter;
 
@@ -45,59 +48,83 @@ public class enemyBehavior : MonoBehaviour {
 
     }
 
-    public void acquireTarget()
+    private GameObject findClosestObject(List<GameObject> objs)
     {
-        //print("finding target");
-        GameObject[] targetObjects = GameObject.FindGameObjectsWithTag(targetType);
         GameObject closest = null;
         float distance = Mathf.Infinity;
         Vector3 position = transform.position;
-        foreach (GameObject go in targetObjects)
+        foreach (GameObject go in objs)
         {
-            //print("---checking target "+ go.name +" at " + go.transform.position);
             Vector3 diff = go.transform.position - position;
             float curDistance = diff.sqrMagnitude;
-            //print("---checking target " + go.name + " at " + go.transform.position + " distance:" + curDistance);
             if (curDistance < distance)
             {
                 closest = go;
                 distance = curDistance;
             }
         }
-        
-        if(closest == null && targetType != "Building")
+        return closest;
+    }
+
+    private GameObject findClosestObject(GameObject[] objs)
+    {
+        GameObject closest = null;
+        float distance = Mathf.Infinity;
+        Vector3 position = transform.position;
+        foreach (GameObject go in objs)
         {
-            targetObjects = GameObject.FindGameObjectsWithTag("Building");
-            foreach (GameObject go in targetObjects)
+            Vector3 diff = go.transform.position - position;
+            float curDistance = diff.sqrMagnitude;
+            if (curDistance < distance)
             {
-                Vector3 diff = go.transform.position - position;
-                float curDistance = diff.sqrMagnitude;
-                if (curDistance < distance)
-                {
-                    closest = go;
-                    distance = curDistance;
-                }
+                closest = go;
+                distance = curDistance;
             }
         }
-        
-        
+        return closest;
+    }
+
+    public bool changeTargetClosest()
+    {
+        gameBoard cgb = (gameBoard)FindObjectOfType(typeof(gameBoard));
+        GameObject closest = null;
+        closest = findClosestObject(cgb.playerStructures);
+        if (closest != null)
+        {
+            target.x = closest.transform.position.x;
+            target.y = closest.transform.position.y;
+            targetObject = closest;
+            return true;
+        }
+        else
+            return false;
+    }
+
+    public void acquireTarget()
+    {
+        //print("finding target");
+        GameObject[] targetObjects = GameObject.FindGameObjectsWithTag(targetType);
+        GameObject closest = null;
+        closest = findClosestObject(targetObjects);
+
+        if (closest == null && targetType != "Building")
+        {
+            targetObjects = GameObject.FindGameObjectsWithTag("Building");
+            closest = findClosestObject(targetObjects);
+        }
 
         if (closest != null)
         {
             target.x = closest.transform.position.x;
             target.y = closest.transform.position.y;
-            //Debug.Log("MyTarget:" + closest.transform.position + " Target:" + target);
             targetObject = closest;
         }
         else
         {
-            print("Failed to find Target!!!");
-            target.x = position.x;
-            target.y = position.y;
-            targetObject = null;
-            Application.Quit();
-
-
+            print("Enemy failed to find Primar or Secondary Targets!!!");
+            bool anyTargetsLeft = changeTargetClosest();
+            if (!anyTargetsLeft)
+                print("END GAME");
         }
     }
 
@@ -165,7 +192,6 @@ public class enemyBehavior : MonoBehaviour {
         attackSpeed = .5f;
         attackCycle = attackSpeed;
         damage = 10;
-        moveSpeed = .5f;
         targetObject = null;
         targetType = "Tower";
         target = new Vector2(0, 0);
@@ -174,9 +200,15 @@ public class enemyBehavior : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
+        reaquireClock += Time.deltaTime;
+        if (reaquireClock > reaquireFrequency)
+        {
+            reaquireClock = 0;
+            acquireTarget();
+        }
+
         if (attackCycle > 0)
             attackCycle -= Time.deltaTime;
-
         if (isAsleep)
             sleepCounter += Time.deltaTime;
         if (sleepCounter > 15)
@@ -189,21 +221,30 @@ public class enemyBehavior : MonoBehaviour {
 
         if (targetObject == null && !isAsleep)
         {
-            //print("acquiring new target");
+         
             hasPath = false;
             myPath.Clear();
             acquireTarget();
             if (targetObject == null)
             {
-                //SleepTimeout
+                isAsleep = true;
             }
 
         }
 
         if (targetObject != null)
         {
-            if(!hasPath)
-                    findPath();
+            if (!hasPath)
+            {
+                findPath();
+                if (!hasPath)
+                {
+                    print("Bollux.No path found");
+                    changeTargetClosest();
+                }
+            }
+                
+            
             engageTarget();
         }
 

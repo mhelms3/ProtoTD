@@ -34,14 +34,14 @@ public class cameraBehavior : MonoBehaviour {
     // Update is called once per frame
     void adjustCamera()
     {
-        float height = (camera1.orthographicSize * 2.0f);
+        float height = (camera1.orthographicSize * 1.8f);
         float width = height * Screen.width / Screen.height;
 
         float maxX = tileSizeX - width / 2 + 7;
         float minX = width / 2;
 
         float maxY = tileSizeY - height / 2;
-        float minY = height / 2;
+        float minY = (height*.9f) / 2;
 
 
         if (camera1.transform.position.x > maxX)
