@@ -307,8 +307,8 @@ public class gameBoard : MonoBehaviour
         GameObject eGo;
         for(int i=0; i<startingEnemies; i++)
         {
-            xPo = Random.value * 15 +5;
-            yPo = Random.value * 15 +5;
+            xPo = Random.value * 7 +  8 ;
+            yPo = Random.value * 7 + 8;
             eGo = Instantiate(enemyType[0], new Vector3(xPo, yPo, 1), Quaternion.identity) as GameObject;
             enemies.Add(eGo);
         }
@@ -593,6 +593,8 @@ public class gameBoard : MonoBehaviour
         initializeGUI();
         getWalkableSquares();
         spawnEnemies();
+
+        
     }
     
     private void updateMarketIncome()

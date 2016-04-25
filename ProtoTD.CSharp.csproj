@@ -13,13 +13,11 @@
     <TargetFrameworkIdentifier>.NETFramework</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>Unity Subset v3.5</TargetFrameworkProfile>
-    <CompilerResponseFile>
-    </CompilerResponseFile>
+    <CompilerResponseFile></CompilerResponseFile>
     <UnityProjectType>Game:1</UnityProjectType>
     <UnityBuildTarget>StandaloneWindows:5</UnityBuildTarget>
     <UnityVersion>5.3.4f1</UnityVersion>
-    <RootNamespace>
-    </RootNamespace>
+    <RootNamespace></RootNamespace>
     <LangVersion Condition=" '$(VisualStudioVersion)' != '10.0' ">4</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -75,14 +73,15 @@
     <Compile Include="Assets\Scripts\BoardTerrain.cs" />
     <Compile Include="Assets\Scripts\StructureBehavior.cs" />
     <Compile Include="Assets\Scripts\ammoScript.cs" />
+    <Compile Include="Assets\Scripts\buttonBehaviorScript.cs" />
     <Compile Include="Assets\Scripts\cameraBehavior.cs" />
     <Compile Include="Assets\Scripts\castleScript.cs" />
     <Compile Include="Assets\Scripts\enemyBehavior.cs" />
     <Compile Include="Assets\Scripts\foundationScript.cs" />
     <Compile Include="Assets\Scripts\gameBoard.cs" />
     <Compile Include="Assets\Scripts\pathFindingScript.cs" />
-    <Compile Include="Assets\Scripts\towerScript.cs" />
     <Compile Include="Assets\Scripts\resourceBuildingScript.cs" />
+    <Compile Include="Assets\Scripts\towerScript.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\SyntaxTree\UnityVS\2015\UnityVS.CSharp.targets" />
 </Project>

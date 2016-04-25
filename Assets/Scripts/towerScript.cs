@@ -61,12 +61,14 @@ public class towerScript : MonoBehaviour {
         {
             //Vector3 relativePos = attackTarget.transform.position - transform.position;
             //Quaternion rotation = Quaternion.LookRotation(relativePos);
-            GameObject ammo = Instantiate(arrowAmmo, transform.position, Quaternion.identity) as GameObject;
+            Vector3 startingPos = new Vector3(transform.position.x +.25f, transform.position.y - .5f, transform.position.z);
+            GameObject ammo = Instantiate(arrowAmmo, startingPos, Quaternion.identity) as GameObject;
 
             ammoScript aScript = ammo.GetComponent<ammoScript>();
             aScript.attackTarget = attackTarget;
             attackTimer = 0;
-            
+            findTarget();
+
             //giveammoChars
         }
 
@@ -82,7 +84,7 @@ public class towerScript : MonoBehaviour {
         maxSoldiers = 2;
         rateOfFire = 3;
         attackTimer = 0;
-        attackRange = 30;
+        attackRange = 5000;
         isActive = false;                
 	}
 	

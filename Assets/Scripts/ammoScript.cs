@@ -21,12 +21,19 @@ public class ammoScript : MonoBehaviour
     void Start()
     {
         hasTarget = true;
+
+        //TrailRenderer tr = gameObject.GetComponentInChildren<TrailRenderer>();
+        //tr.sortingLayerName = "Structure";
+        ParticleSystemRenderer psr = gameObject.GetComponentInChildren<ParticleSystemRenderer>();
+        psr.sortingLayerName = "Structure";
+        
+
     }
 
-    
+
     void OnTriggerEnter2D(Collider2D col)
     {
-        print("Arrow HIT Something");
+        print("Ammo HIT Something");
         if (col.gameObject.tag == "Enemy")
         {
             enemyBehavior enemyInfo = col.gameObject.GetComponent<enemyBehavior>();
