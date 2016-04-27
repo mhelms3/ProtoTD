@@ -47,11 +47,18 @@
   <ItemGroup>
      <Compile Include="Assets\Scripts\BoardSquare.cs" />
      <Compile Include="Assets\Scripts\BoardTerrain.cs" />
-     <Compile Include="Assets\Scripts\CreateGameBoard.cs" />
      <Compile Include="Assets\Scripts\StructureBehavior.cs" />
+     <Compile Include="Assets\Scripts\ammoScript.cs" />
+     <Compile Include="Assets\Scripts\buttonBehaviorScript.cs" />
+     <Compile Include="Assets\Scripts\cameraBehavior.cs" />
      <Compile Include="Assets\Scripts\castleScript.cs" />
+     <Compile Include="Assets\Scripts\enemyBehavior.cs" />
      <Compile Include="Assets\Scripts\foundationScript.cs" />
-     <Compile Include="Assets\cameraBehavior.cs" />
+     <Compile Include="Assets\Scripts\gameBoard.cs" />
+     <Compile Include="Assets\Scripts\pathFindingScript.cs" />
+     <Compile Include="Assets\Scripts\resourceBuildingScript.cs" />
+     <Compile Include="Assets\Scripts\towerScript.cs" />
+     <None Include="Assets\PyroParticles\Prefab\Materials\AdditiveTintable.shader" />
  <Reference Include="UnityEngine.UI">
  <HintPath>C:/Program Files/Unity/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
  </Reference>

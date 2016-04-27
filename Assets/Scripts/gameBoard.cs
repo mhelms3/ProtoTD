@@ -22,6 +22,8 @@ public class gameBoard : MonoBehaviour
     public GameObject farm;
     public GameObject market;
 
+    public GameObject wall;
+
 
     public GameObject buildMenuPanel;
     public GameObject structureMenuPanel;
@@ -281,7 +283,7 @@ public class gameBoard : MonoBehaviour
                 bs.positionY = j;
 
                 srSquare.sprite = srTerrain.sprite;
-
+                /*
                 currentRnd = Mathf.CeilToInt(Random.value * 100 + .49f);
                 if (currentRnd < 3)
                 {
@@ -291,14 +293,20 @@ public class gameBoard : MonoBehaviour
                     tempObject.SendMessage("RuinStart", ruinMaterial[currentRnd - 1]);
                     tempObject.SendMessage("SquareAssignment", bs);
                 }
+                */
             }
     }
 
     public void popEnemy(GameObject e)
     {
-        print("Enemy# " + enemies.Count);
+        //print("Enemy# " + enemies.Count);
         enemies.Remove(e);
-        print("Enemy new # " + enemies.Count);
+        //print("Enemy new # " + enemies.Count);
+    }
+
+    void addEnemyToBoard(GameObject e)
+    {
+        enemies.Add(e);
     }
 
     void spawnEnemies()
@@ -353,6 +361,43 @@ public class gameBoard : MonoBehaviour
             //Debug.Log("Deselected " + tempSB.structureName);
         }
         //getWalkableSquares();
+    }
+
+    void buildWall()
+    {
+
+        float wallStone = 50;
+        if (hasStructure(selectedTile))
+        {
+            Debug.Log("Tile has structure already");
+        }
+        else
+        {
+            Debug.Log("Building Wall");
+            if (playerStone > wallStone)
+            {
+                Vector3 currentLocation = new Vector3(selectedTile.x, selectedTile.y, 0);
+                GameObject thisWall = Instantiate(wall, new Vector3(selectedTile.x + 1, selectedTile.y + 1, 0), Quaternion.identity) as GameObject;
+
+                assignStructure(Mathf.FloorToInt(selectedTile.x), Mathf.FloorToInt(selectedTile.y), thisWall, false);
+                StructureBehavior sb = (StructureBehavior)thisWall.GetComponent(typeof(StructureBehavior));
+                initializeNewStructure(sb);
+                sb.buildingType = "Wall";
+                sb.buildingSubType = "Wall";
+                sb.woodCost = 0;
+                sb.stoneCost = wallStone;
+                playerStone -= wallStone;
+                Debug.Log("Wall Built at " + currentLocation);
+                //openMenu("Structure");
+                currentWalkability = false;
+                currentEnemy = false;
+            }
+            else
+            {
+                if (playerStone < wallStone)
+                    Debug.Log("Insufficient Stone");
+            }
+        }
     }
 
     void buildTower(string subType, GameObject tower, float stoneRec, float woodRec)
@@ -651,10 +696,32 @@ public class gameBoard : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.A))
         {
             buildArrowTower();
-            Debug.Log(buildMenuFlag);            
         }
 
-        
-       
+        if (Input.GetKeyDown(KeyCode.C))
+        {
+            buildCannonTower();
+        }
+
+        if (Input.GetKeyDown(KeyCode.H))
+        {
+            buildHolyTower();
+            
+        }
+
+        if (Input.GetKeyDown(KeyCode.W))
+        {
+            buildWizardTower();
+            
+        }
+
+        if (Input.GetKeyDown(KeyCode.Z))
+        {
+            buildWall();
+
+        }
+
+
+
     }
 }

@@ -79,9 +79,13 @@
     <Compile Include="Assets\Scripts\enemyBehavior.cs" />
     <Compile Include="Assets\Scripts\foundationScript.cs" />
     <Compile Include="Assets\Scripts\gameBoard.cs" />
+    <Compile Include="Assets\Scripts\generatorScript.cs" />
     <Compile Include="Assets\Scripts\pathFindingScript.cs" />
     <Compile Include="Assets\Scripts\resourceBuildingScript.cs" />
     <Compile Include="Assets\Scripts\towerScript.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Assets\PyroParticles\Prefab\Materials\AdditiveTintable.shader" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\SyntaxTree\UnityVS\2015\UnityVS.CSharp.targets" />
 </Project>

@@ -2,9 +2,6 @@
 using System.Collections;
 
 public class towerScript : MonoBehaviour {
-
-
-
     public int towerLevel;
     public int towerType;
     public int soldiers;
@@ -16,7 +13,7 @@ public class towerScript : MonoBehaviour {
     public float attackTimer;
     public float attackRange;
 
-    public GameObject arrowAmmo;
+    public GameObject towerAmmo;
     public GameObject attackTarget;
     public string targetType = "Enemy";
 
@@ -45,7 +42,7 @@ public class towerScript : MonoBehaviour {
         if (closest != null)
         {
             attackTarget = closest;
-            print("---attack target " + closest.name + " at " + closest.transform.position + " distance:" + distance);
+            //print("---attack target " + closest.name + " at " + closest.transform.position + " distance:" + distance);
         }
    }
 
@@ -62,7 +59,7 @@ public class towerScript : MonoBehaviour {
             //Vector3 relativePos = attackTarget.transform.position - transform.position;
             //Quaternion rotation = Quaternion.LookRotation(relativePos);
             Vector3 startingPos = new Vector3(transform.position.x +.25f, transform.position.y - .5f, transform.position.z);
-            GameObject ammo = Instantiate(arrowAmmo, startingPos, Quaternion.identity) as GameObject;
+            GameObject ammo = Instantiate(towerAmmo, startingPos, Quaternion.identity) as GameObject;
 
             ammoScript aScript = ammo.GetComponent<ammoScript>();
             aScript.attackTarget = attackTarget;
@@ -82,7 +79,6 @@ public class towerScript : MonoBehaviour {
     void Start () {
         soldiers = 0;
         maxSoldiers = 2;
-        rateOfFire = 3;
         attackTimer = 0;
         attackRange = 5000;
         isActive = false;                

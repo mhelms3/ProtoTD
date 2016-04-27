@@ -151,7 +151,7 @@ public class BoardSquare : MonoBehaviour {
         cgb.selector.transform.position = new Vector3(positionX + 1, positionY + 1, 0);
 
 
-        Debug.Log("Position[" + positionX + "," + positionY + "] Name:" + squareName + " W:" + wood + " S:" + stone + " F:" + food);
+        //Debug.Log("Position[" + positionX + "," + positionY + "] Name:" + squareName + " W:" + wood + " S:" + stone + " F:" + food);
 
 
     }

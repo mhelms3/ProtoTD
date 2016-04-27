@@ -8,19 +8,21 @@ public class ammoScript : MonoBehaviour
     public float speed = 5;
     public float maxDistance = 5.6f;
     public float distanceTraveled;
-    public float damageLower = 1;
-    public float damageUpper = 5;
+    public float damageLower = 2;
+    public float damageUpper = 7;
     public string damageType;
     public float angle = 90;
     public bool isHoming;
     public bool hasTarget;
 
     public GameObject attackTarget;
+    public Vector3 attackPosition;
 
     // Use this for initialization
     void Start()
     {
         hasTarget = true;
+        isHoming = false;
 
         //TrailRenderer tr = gameObject.GetComponentInChildren<TrailRenderer>();
         //tr.sortingLayerName = "Structure";
@@ -33,13 +35,11 @@ public class ammoScript : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D col)
     {
-        print("Ammo HIT Something");
         if (col.gameObject.tag == "Enemy")
         {
-            enemyBehavior enemyInfo = col.gameObject.GetComponent<enemyBehavior>();
-            float damage = Mathf.Round(Random.value * (damageUpper - damageLower) + damageLower);
-            enemyInfo.hitPoints -= damage;
-            print("Hit enemy for " + damage + " damage");
+            //enemyBehavior enemyInfo = col.gameObject.GetComponent<enemyBehavior>();
+            //float damage = Mathf.Round(Random.value * (damageUpper - damageLower) + damageLower);
+            //enemyInfo.hitPoints -= damage;
             Destroy(gameObject);
         }
 
@@ -92,16 +92,18 @@ public class ammoScript : MonoBehaviour
 
     void moveAmmo(float s)
     {
-        Vector3 targetPosition = attackTarget.transform.position + new Vector3(0.5f, -0.5f);
-        transform.position = Vector3.MoveTowards(transform.position, targetPosition, s);
-        rotateToTarget(targetPosition);
+        if(attackTarget != null)
+            attackPosition = attackTarget.transform.position + new Vector3(0.5f, -0.5f);
+
+        transform.position = Vector3.MoveTowards(transform.position, attackPosition, s);
+        rotateToTarget(attackPosition);
             
     }
     // Update is called once per frame
     void Update()
     {
         float step = speed * Time.deltaTime;
-        if (attackTarget == null)
+        if (attackTarget == null && isHoming)
         {
             hasTarget = getNewTarget();
         }
@@ -112,7 +114,7 @@ public class ammoScript : MonoBehaviour
         }
 
         
-        if (distanceTraveled > maxDistance || hasTarget == false)
+        if (distanceTraveled > maxDistance || hasTarget == false || getDistance(attackPosition, transform.position)<.00001)
             Destroy(gameObject);
         
 

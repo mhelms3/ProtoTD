@@ -5,12 +5,14 @@ public class enemyBehavior : MonoBehaviour {
 
     
     public float hitPoints;
+    public float maxPoints;
     public float moveSpeed;
     public float attackRange;
     public float damage;
     public float attackCycle;
     public float attackSpeed;
 
+    private SpriteRenderer healthBar;
     public float reaquireFrequency;
     public float reaquireClock = 0;
 
@@ -42,10 +44,24 @@ public class enemyBehavior : MonoBehaviour {
             ammoScript aScript = col.gameObject.GetComponent<ammoScript>();
             float damage = Mathf.Round(Random.value * (aScript.damageUpper - aScript.damageLower) + aScript.damageLower);
             hitPoints -= damage;
-            print("Hit for " + damage + " damage");
+            //print("Hit for " + damage + " damage");
+            updateStatusBars();
             Destroy(col.gameObject);
         }
+    }
 
+    private void updateStatusBars()
+    {
+        
+        float ratio = hitPoints / maxPoints;
+        print("updatebarAAA: dmg "+ ratio);
+        if (ratio > .66)
+            healthBar.color = Color.green;
+        else if (ratio > .33)
+            healthBar.color = Color.yellow;
+        else
+            healthBar.color = Color.red;
+        healthBar.transform.localScale = new Vector3(ratio, 1, 1);
     }
 
     private GameObject findClosestObject(List<GameObject> objs)
@@ -167,6 +183,8 @@ public class enemyBehavior : MonoBehaviour {
         }        
     }
 
+ 
+
     public void engageTarget()
     {
         Vector3 position = transform.position;
@@ -185,9 +203,21 @@ public class enemyBehavior : MonoBehaviour {
 
         //move to target, if close enough, attack target
     }
+
+    private void getHealthBar()
+    {
+        SpriteRenderer[] sprites = GetComponentsInChildren<SpriteRenderer>();
+        foreach (SpriteRenderer c in sprites)
+        {
+            if (c.name == "HealthBar")
+                healthBar = c;
+        }
+    }
+
 	// Use this for initialization
 	void Start () {
         hitPoints = 20;
+        maxPoints = hitPoints;
         attackRange = 2;
         attackSpeed = .5f;
         attackCycle = attackSpeed;
@@ -196,6 +226,9 @@ public class enemyBehavior : MonoBehaviour {
         targetType = "Tower";
         target = new Vector2(0, 0);
         hasPath = false;
+
+        getHealthBar();
+        updateStatusBars();
 }	
 	// Update is called once per frame
 	void Update () {
@@ -239,7 +272,7 @@ public class enemyBehavior : MonoBehaviour {
                 findPath();
                 if (!hasPath)
                 {
-                    print("Bollux.No path found");
+                    print("Bollux.No path found");  
                     changeTargetClosest();
                 }
             }
