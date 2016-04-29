@@ -545,10 +545,12 @@ public class gameBoard : MonoBehaviour
         {
             int layerMask = 1 << 8;
             BoardSquare b = go.GetComponent<BoardSquare>();
-            Vector3 checkArea = new Vector3(b.positionX+.5f, b.positionY-.5f, 0);            
-            b.isWalkable = !(Physics.CheckBox(checkArea, Vector3.one*.2f, Quaternion.identity, layerMask));
-            
-            
+            //Vector3 checkArea = new Vector3(b.positionX+.5f, b.positionY-.5f, 0);
+            //b.isWalkable = !(Physics.CheckBox(checkArea, Vector3.one*.2f, Quaternion.identity, layerMask));
+            Vector2 checkArea = new Vector2(b.positionX + .5f, b.positionY - .5f);
+            b.isWalkable = !(Physics2D.BoxCast(checkArea, Vector2.one * .2f, 0, Vector2.zero, Mathf.Infinity, layerMask));
+
+
         }
         currentWalkability = true;
     }

@@ -49,7 +49,7 @@ public class BoardSquare : MonoBehaviour {
         GameObject temp = GameObject.Find("Health Slider");
         if (temp != null)
             aSlider = temp.GetComponent<Slider>();
-        aSlider.value = 0;
+    
        
         temp = GameObject.Find("Construction Slider");
         if (temp != null)

@@ -38,7 +38,20 @@ public class StructureBehavior : MonoBehaviour {
 
     public Slider aSlider;
     public Text aText;
-
+    
+    void OnTriggerEnter2D(Collider2D col)
+    {
+        print("Hit building");
+        if (col.gameObject.tag == "EnemyAmmo")
+        {
+            ammoScript aScript = col.gameObject.GetComponent<ammoScript>();
+            float damage = Mathf.Round(Random.value * (aScript.damageUpper - aScript.damageLower) + aScript.damageLower);
+            integrity -= damage;
+            print("Building hit for " + damage + " damage");
+            updateStatusBars();
+            Destroy(col.gameObject);
+        }
+    }
     string makeSpecialsString()
     {
         string tempString = "";

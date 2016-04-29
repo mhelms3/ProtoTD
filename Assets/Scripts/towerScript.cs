@@ -60,7 +60,6 @@ public class towerScript : MonoBehaviour {
             //Quaternion rotation = Quaternion.LookRotation(relativePos);
             Vector3 startingPos = new Vector3(transform.position.x +.25f, transform.position.y - .5f, transform.position.z);
             GameObject ammo = Instantiate(towerAmmo, startingPos, Quaternion.identity) as GameObject;
-
             ammoScript aScript = ammo.GetComponent<ammoScript>();
             aScript.attackTarget = attackTarget;
             attackTimer = 0;

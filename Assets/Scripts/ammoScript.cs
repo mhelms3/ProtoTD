@@ -14,6 +14,8 @@ public class ammoScript : MonoBehaviour
     public float angle = 90;
     public bool isHoming;
     public bool hasTarget;
+    public bool isEnemyAttack;
+    public bool isRotating;
 
     public GameObject attackTarget;
     public Vector3 attackPosition;
@@ -27,7 +29,8 @@ public class ammoScript : MonoBehaviour
         //TrailRenderer tr = gameObject.GetComponentInChildren<TrailRenderer>();
         //tr.sortingLayerName = "Structure";
         ParticleSystemRenderer psr = gameObject.GetComponentInChildren<ParticleSystemRenderer>();
-        psr.sortingLayerName = "Structure";
+        if(psr!=null)
+            psr.sortingLayerName = "Structure";
         
 
     }
@@ -35,8 +38,16 @@ public class ammoScript : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D col)
     {
-        if (col.gameObject.tag == "Enemy")
+        if (col.gameObject.tag == "Enemy" && !isEnemyAttack)
         {
+            //enemyBehavior enemyInfo = col.gameObject.GetComponent<enemyBehavior>();
+            //float damage = Mathf.Round(Random.value * (damageUpper - damageLower) + damageLower);
+            //enemyInfo.hitPoints -= damage;
+            Destroy(gameObject);
+        }
+        else if (col.gameObject.tag == "Building" || col.gameObject.tag == "Tower")
+        {
+            print("Hit a Building");
             //enemyBehavior enemyInfo = col.gameObject.GetComponent<enemyBehavior>();
             //float damage = Mathf.Round(Random.value * (damageUpper - damageLower) + damageLower);
             //enemyInfo.hitPoints -= damage;
@@ -84,10 +95,16 @@ public class ammoScript : MonoBehaviour
 
     void rotateToTarget(Vector3 tp)
     {
-        Vector3 targetDir = tp - transform.position;
-        float angle = Mathf.Atan2(targetDir.y, targetDir.x) * Mathf.Rad2Deg ;
-        transform.rotation = Quaternion.identity;
-        transform.Rotate(0, 0, angle-90);
+        if (!isRotating)
+        {
+            Vector3 targetDir = tp - transform.position;
+            float angle = Mathf.Atan2(targetDir.y, targetDir.x) * Mathf.Rad2Deg;
+            transform.rotation = Quaternion.identity;
+            transform.Rotate(0, 0, angle - 90);
+        }
+        else
+            transform.Rotate(0, 0, -27);
+
     }
 
     void moveAmmo(float s)
@@ -113,9 +130,12 @@ public class ammoScript : MonoBehaviour
             distanceTraveled += step;
         }
 
-        
-        if (distanceTraveled > maxDistance || hasTarget == false || getDistance(attackPosition, transform.position)<.00001)
+
+        if (distanceTraveled > maxDistance || hasTarget == false || getDistance(attackPosition, transform.position) < .00001)
+        {
             Destroy(gameObject);
+            //print("distance destroy");
+        }
         
 
     }

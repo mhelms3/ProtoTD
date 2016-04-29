@@ -19,6 +19,7 @@ public class enemyBehavior : MonoBehaviour {
     private bool triggerDeathFlag = false;
     public Vector2 target;
     public GameObject targetObject;
+    public GameObject enemyAmmo;
 
     public List<BoardSquare> myPath;
     public string targetType;
@@ -148,9 +149,13 @@ public class enemyBehavior : MonoBehaviour {
     {
         if (attackCycle < .001)
         {
-            StructureBehavior tsb = targetObject.GetComponent<StructureBehavior>();
-            tsb.integrity -= damage;
-            tsb.SendMessage("updateStatusBars");            
+            print("Attacking");
+            Vector3 startingPos = new Vector3(transform.position.x + .25f, transform.position.y - .5f, transform.position.z);
+            GameObject ammo = Instantiate(enemyAmmo, startingPos, Quaternion.identity) as GameObject;
+            ammoScript aScript = ammo.GetComponent<ammoScript>();
+            aScript.attackTarget = targetObject;
+            aScript.isEnemyAttack = true;
+            aScript.isRotating = true;
             attackCycle = attackSpeed;
         }
     }
@@ -216,17 +221,12 @@ public class enemyBehavior : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-        hitPoints = 20;
         maxPoints = hitPoints;
-        attackRange = 2;
-        attackSpeed = .5f;
         attackCycle = attackSpeed;
-        damage = 10;
         targetObject = null;
         targetType = "Tower";
         target = new Vector2(0, 0);
         hasPath = false;
-
         getHealthBar();
         updateStatusBars();
 }	
@@ -276,8 +276,6 @@ public class enemyBehavior : MonoBehaviour {
                     changeTargetClosest();
                 }
             }
-                
-            
             engageTarget();
         }
 
