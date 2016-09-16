@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.EventSystems;
 using System.Collections;
 
 public class towerScript : MonoBehaviour {
@@ -79,12 +80,14 @@ public class towerScript : MonoBehaviour {
         soldiers = 0;
         maxSoldiers = 2;
         attackTimer = 0;
-        attackRange = 5000;
+        //attackRange = 5000;
         isActive = false;                
 	}
-	
-	// Update is called once per frame
-	void Update () {
+
+  
+
+    // Update is called once per frame
+    void Update () {
 	
         if(attackTarget == null)
         {

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 public class StructureBehavior : MonoBehaviour {
 
@@ -66,6 +67,15 @@ public class StructureBehavior : MonoBehaviour {
     void SquareAssignment(BoardSquare bs)
     {
         homeSquare = bs;
+    }
+
+    void OnMouseDown()
+    {
+        if (!EventSystem.current.IsPointerOverGameObject())
+        {
+            UpdateStructurePanel();
+            homeSquare.SendMessage("updateTerrainUI");
+        }
     }
 
     void UpdateStructurePanel()

@@ -30,10 +30,11 @@ public class ammoScript : MonoBehaviour
         //tr.sortingLayerName = "Structure";
         ParticleSystemRenderer psr = gameObject.GetComponentInChildren<ParticleSystemRenderer>();
         if(psr!=null)
-            psr.sortingLayerName = "Structure";
+            psr.sortingLayerName = "Ammo";
         
 
     }
+
 
 
     void OnTriggerEnter2D(Collider2D col)

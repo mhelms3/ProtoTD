@@ -210,6 +210,97 @@ public class gameBoard : MonoBehaviour
         Debug.Log(home);
     }
 
+
+    string findTileType(int i)
+    {
+        string tileType = "";
+        switch (i)
+        {
+            case 1:
+                tileType = "Grasslands";
+                break;
+            case 2:
+                tileType = "LightWoods";
+                break;
+            case 3:
+                tileType = "LowHills";
+                break;
+            case 4:
+                tileType = "Mountains";
+                break;
+            case 5:
+                tileType = "RoughHills";
+                break;
+            case 6:
+                tileType = "StoneHills";
+                break;
+            case 7:
+                tileType = "Swamp";
+                break;
+            case 8:
+                tileType = "WoodedHills";
+                break;
+            case 9:
+                tileType = "Woods";
+                break;
+            default:
+                tileType = "Grasslands";
+                break;
+        }
+        return tileType;
+    }
+
+
+    void generateTerrain (int[,] terrainArray, float percentTerrain, int terrainType, int minimumSeedNum)
+    {
+        int tileNum = tileSizeX * tileSizeY;
+        int seedCount = Mathf.CeilToInt(minimumSeedNum + (percentTerrain * 20));
+        int terrainTotal = Mathf.CeilToInt(percentTerrain * tileNum);
+
+        for (int i = 0; i < seedCount; i++)
+        {
+            int tempx = Mathf.CeilToInt(Random.value * (tileSizeX - 10)+5);
+            int tempy = Mathf.CeilToInt(Random.value * (tileSizeY - 10)+5);
+            if (terrainArray[tempx, tempy] == 1)
+                terrainArray[tempx, tempy] = terrainType;
+            else
+                i--;
+        }
+
+        int currentTerrain = seedCount;
+
+        while (currentTerrain < terrainTotal)
+        {
+            for (int i = 0; i < tileSizeX; i++)
+            {
+                if (currentTerrain > terrainTotal)
+                    break;
+                for (int j = 0; j < tileSizeY; j++)
+                {
+                    if (terrainArray[i, j] == terrainType)
+                    {
+                        for (int k = -1; k < 2; k++)
+                        {
+                            for (int l = -1; l < 2; l++)
+                            {
+                                if (Random.value < .02)
+                                {
+                                    if (((i + k) > 0) && ((i + k) < tileSizeX) && ((j + l) > 0) && ((j + l) < tileSizeY) && (terrainArray[i + k, j + l] == 1))
+                                    {
+                                        terrainArray[i + k, j + l] = terrainType;
+                                        currentTerrain++;
+                                        if (currentTerrain > terrainTotal)
+                                            break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     void initializeGameBoard()
     {
         initializeTerrainDictionary();
@@ -219,53 +310,34 @@ public class gameBoard : MonoBehaviour
         BoardSquare bs;
         SpriteRenderer srTerrain;
         SpriteRenderer srSquare;
-        
+
+        int[,] terrainGenArray = new int[tileSizeX, tileSizeY];
+        for (int i = 0; i < tileSizeX; i++)
+            for (int j = 0; j < tileSizeY; j++)
+                terrainGenArray[i, j] = 1; //initialize to grasslands
+
+        generateTerrain(terrainGenArray, .2f, 6, 6);
+        generateTerrain(terrainGenArray, .1f, 7, 4);
+        generateTerrain(terrainGenArray, .1f, 2, 25);
+        generateTerrain(terrainGenArray, .1f, 8, 25);
+        generateTerrain(terrainGenArray, .1f, 9, 25);
+
+
         selector = Instantiate(selectorAnimation, new Vector3(startingPositionX+1, startingPositionY+1, 0), Quaternion.identity) as GameObject;
 
 
-        int currentRnd;
-        string[] ruinMaterial = { "Marble", "Granite", "Obsidian", "Limestone", "Basalt", "Brownstone", "Flagstone", "Quadratum" };
+        //int currentRnd;
+        //string[] ruinMaterial = { "Marble", "Granite", "Obsidian", "Limestone", "Basalt", "Brownstone", "Flagstone", "Quadratum" };
 
         boardTile = new GameObject[tileSizeX, tileSizeY];
 
         for (int i = 0; i < tileSizeX; i++)
             for (int j = 0; j < tileSizeY; j++)
             {
-                currentRnd = Mathf.CeilToInt(Random.value * 9 + .49f);
-                switch (currentRnd)
-                {
-                    case 1:
-                        tempTile = "Grasslands";
-                        break;
-                    case 2:
-                        tempTile = "LightWoods";
-                        break;
-                    case 3:
-                        tempTile = "LowHills";
-                        break;
-                    case 4:
-                        tempTile = "Mountains";
-                        break;
-                    case 5:
-                        tempTile = "RoughHills";
-                        break;
-                    case 6:
-                        tempTile = "StoneHills";
-                        break;
-                    case 7:
-                        tempTile = "Swamp";
-                        break;
-                    case 8:
-                        tempTile = "WoodedHills";
-                        break;
-                    case 9:
-                        tempTile = "Woods";
-                        break;
-                    default:
-                        tempTile = "Grasslands";
-                        break;
-                }
 
+                int tileDesignation = terrainGenArray[i, j];
+                tempTile = findTileType(tileDesignation);
+                //tempTile = "Grasslands";
                 currentTerrain = terrainDictionary[tempTile];
 
                 bt = (BoardTerrain)currentTerrain.GetComponent(typeof(BoardTerrain));
@@ -283,6 +355,8 @@ public class gameBoard : MonoBehaviour
                 bs.positionY = j;
 
                 srSquare.sprite = srTerrain.sprite;
+               
+
                 /*
                 currentRnd = Mathf.CeilToInt(Random.value * 100 + .49f);
                 if (currentRnd < 3)
@@ -348,6 +422,10 @@ public class gameBoard : MonoBehaviour
         sb.foundationMaterial = "Stone";
         sb.buildFlag = true;
         sb.isSelected = true;
+
+        GameObject tile = boardTile[sb.positionX, sb.positionY];
+        BoardSquare thisSquare = (BoardSquare)tile.GetComponent(typeof(BoardSquare));
+        sb.homeSquare = thisSquare;
     }
 
     void deselectCurrentStructure()
@@ -409,15 +487,10 @@ public class gameBoard : MonoBehaviour
         }
         else
         {
-         
-
-            Debug.Log("Building Tower");
             if (playerWood > woodRec && playerStone > stoneRec)
             {
                 Vector3 currentLocation = new Vector3(selectedTile.x, selectedTile.y, 0);
-
                 GameObject thisTower = Instantiate(tower, new Vector3(selectedTile.x + 1, selectedTile.y + 1, 0), Quaternion.identity) as GameObject;
-
                 assignStructure(Mathf.FloorToInt(selectedTile.x), Mathf.FloorToInt(selectedTile.y), thisTower, false);
                 StructureBehavior sb = (StructureBehavior)thisTower.GetComponent(typeof(StructureBehavior));
                 initializeNewStructure(sb);
@@ -699,31 +772,38 @@ public class gameBoard : MonoBehaviour
         {
             buildArrowTower();
         }
-
         if (Input.GetKeyDown(KeyCode.C))
         {
             buildCannonTower();
         }
-
         if (Input.GetKeyDown(KeyCode.H))
         {
             buildHolyTower();
-            
         }
-
         if (Input.GetKeyDown(KeyCode.W))
         {
             buildWizardTower();
-            
         }
-
         if (Input.GetKeyDown(KeyCode.Z))
         {
             buildWall();
-
         }
-
-
+        if (Input.GetKeyDown(KeyCode.F))
+        {
+            buildFarm();
+        }
+        if (Input.GetKeyDown(KeyCode.M))
+        {
+            buildMine();
+        }
+        if (Input.GetKeyDown(KeyCode.L))
+        {
+            buildMill();
+        }
+        if (Input.GetKeyDown(KeyCode.K))
+        {
+            buildMarket();
+        }
 
     }
 }

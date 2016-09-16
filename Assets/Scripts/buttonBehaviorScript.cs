@@ -5,6 +5,8 @@ using System.Collections;
 public class buttonBehaviorScript : MonoBehaviour {
 
     public Text helpText;
+    public gameBoard gbc;
+  
 
     void showHelpText()
     {
@@ -17,6 +19,7 @@ public class buttonBehaviorScript : MonoBehaviour {
 
    void Start()
     {
+        gbc = FindObjectOfType<gameBoard>() as gameBoard;
         Text[] texts = gameObject.GetComponentsInChildren<Text>();
         foreach (Text t in texts)
         {
@@ -28,5 +31,10 @@ public class buttonBehaviorScript : MonoBehaviour {
 
             }
         }
+    }
+
+    void Update()
+    {
+
     }
 }

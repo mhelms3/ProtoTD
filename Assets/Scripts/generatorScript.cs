@@ -3,7 +3,7 @@ using System.Collections;
 
 public class generatorScript : MonoBehaviour {
 
-    public GameObject enemy;
+    public GameObject[] enemy;
     public int baseEnemyNumber;
     public int enemyVariableNumber;
 
@@ -27,12 +27,11 @@ public class generatorScript : MonoBehaviour {
     private int positionY;
 	// Use this for initialization
 
-    void generateEnemy()
+    void generateEnemy(int type)
     {
-        
         float newPosx = positionX + (Random.value * 2) - 1;
         float newPosy = positionY + (Random.value * 2) - 1;
-        GameObject e = Instantiate(enemy, new Vector3(newPosx, newPosy, 1), Quaternion.identity) as GameObject;
+        GameObject e = Instantiate(enemy[type], new Vector3(newPosx, newPosy, 1), Quaternion.identity) as GameObject;        
         cgb.SendMessage("addEnemyToBoard", e);
     }
 
@@ -48,6 +47,7 @@ public class generatorScript : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
+        int rndEnemy;
         if (isActive)
         {
             enemyCheckCounter+= Time.deltaTime;
@@ -70,7 +70,8 @@ public class generatorScript : MonoBehaviour {
                 if (pauseCounter > enemyPause)
                 {
                     pauseCounter = 0;
-                    generateEnemy();
+                    rndEnemy = Mathf.FloorToInt(Random.value * 4);
+                    generateEnemy(rndEnemy);
                     numberRemaining -= 1;
                     if (numberRemaining < 1)
                         productionOn = false;
