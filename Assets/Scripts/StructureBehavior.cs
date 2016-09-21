@@ -85,6 +85,9 @@ public class StructureBehavior : MonoBehaviour {
             aSlider = temp.GetComponent<Slider>();
         aSlider.value = integrity;
 
+        if (integrity < 100)
+            updateStatusBars();
+
         if (percentComplete < 100)
         {
             temp = GameObject.Find("Construction Slider");
@@ -161,6 +164,11 @@ public class StructureBehavior : MonoBehaviour {
         {
             if (c.name == "HealthBar")
             {
+                if (integrity > 99.9)
+                    c.enabled = false;
+                else
+                    c.enabled = true;
+
                 if (integrity > 66)
                     c.color = Color.green;
                 else if (integrity > 33)
@@ -231,6 +239,9 @@ public class StructureBehavior : MonoBehaviour {
     }
     // Update is called once per frame
     void Update () {
+
+        
+
 
         if(isSelected && !updatedButtonFlag)
         {

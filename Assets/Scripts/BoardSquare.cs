@@ -34,6 +34,16 @@ public class BoardSquare : MonoBehaviour {
     public Text aText;
     private gameBoard cgb;
     
+    public bool hasWall()
+    {
+        if (structure != null)
+            if (structure.tag == "Wall")
+            {
+                Debug.Log("Wall Detected at:" + positionX + " " + positionY);
+                return true;
+            }
+        return false;
+    }
     
     public float fcost
     {

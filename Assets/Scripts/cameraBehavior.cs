@@ -93,25 +93,25 @@ public class cameraBehavior : MonoBehaviour {
             adjustCamera();
         }
 
-        if (Input.GetKey("up"))
+        if (Input.GetKey("up") || (Input.GetKey(KeyCode.W)))
         {
             moveDirection = new Vector3(0, 1, 0) * scrollSpeed * cameraDistance / 20;
             camera1.transform.position += moveDirection;
             adjustCamera();
         }
-        if (Input.GetKey("down"))
+        if (Input.GetKey("down") || (Input.GetKey(KeyCode.S)))
         {
             moveDirection = new Vector3(0, -1, 0) * scrollSpeed * cameraDistance / 20;
             camera1.transform.position += moveDirection;
             adjustCamera();
         }
-        if (Input.GetKey("left"))
+        if (Input.GetKey("left") || (Input.GetKey(KeyCode.A)))
         {
             moveDirection = new Vector3(-1, 0, 0) * scrollSpeed * cameraDistance / 20;
             camera1.transform.position += moveDirection;
             adjustCamera();
         }
-        if (Input.GetKey("right"))
+        if (Input.GetKey("right") || (Input.GetKey(KeyCode.D)))
         {
             moveDirection = new Vector3(1, 0, 0) * scrollSpeed * cameraDistance / 20;
             camera1.transform.position += moveDirection;

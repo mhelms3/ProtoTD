@@ -70,7 +70,8 @@ public class generatorScript : MonoBehaviour {
                 if (pauseCounter > enemyPause)
                 {
                     pauseCounter = 0;
-                    rndEnemy = Mathf.FloorToInt(Random.value * 4);
+                    //rndEnemy = Mathf.FloorToInt(Random.value * 4);
+                    rndEnemy = 0;
                     generateEnemy(rndEnemy);
                     numberRemaining -= 1;
                     if (numberRemaining < 1)

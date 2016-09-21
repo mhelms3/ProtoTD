@@ -12,6 +12,8 @@ public class gameBoard : MonoBehaviour
     public int playerWorkers;
     public int playerSoldiers;
 
+    private bool pause = false;
+
     public GameObject arrowTower;
     public GameObject cannonTower;
     public GameObject wizardtower;
@@ -77,6 +79,8 @@ public class gameBoard : MonoBehaviour
     public GameObject[] enemyType;
     public List<GameObject> playerStructures = new List<GameObject>();
     public List<GameObject> enemies;
+
+    public Sprite[] WallSprites;
 
 
 
@@ -441,6 +445,72 @@ public class gameBoard : MonoBehaviour
         //getWalkableSquares();
     }
 
+
+    bool checkWall(int x, int y, int i)
+    {
+        GameObject tile = boardTile[x, y];
+        BoardSquare thisSquare = (BoardSquare)tile.GetComponent(typeof(BoardSquare));
+        if (thisSquare.hasWall())
+        {
+            if (i<2)
+                updateWall(thisSquare.structure, x, y, i);
+            return true;
+        }
+        else
+            return false;
+    }
+
+    void updateWall (GameObject wall, int x, int y, int i)
+    {
+        bool up = false;
+        bool dw = false;
+        bool rt = false;
+        bool lt = false;
+
+        up = checkWall(x, y + 1, i + 1);
+        dw = checkWall(x, y - 1, i + 1);
+        rt = checkWall(x + 1, y, i + 1);
+        lt = checkWall(x - 1, y, i + 1);
+
+        if (!up && !dw && !rt && !lt) //none (0)
+            wall.GetComponent<SpriteRenderer>().sprite = WallSprites[0];
+
+        else if (up && !dw && !rt && !lt) // up only (1)
+            wall.GetComponent<SpriteRenderer>().sprite = WallSprites[1];
+        else if (!up && !dw && rt && !lt) // rt only (1)
+            wall.GetComponent<SpriteRenderer>().sprite = WallSprites[2];
+        else if (!up && dw && !rt && !lt) // dw only (1)
+            wall.GetComponent<SpriteRenderer>().sprite = WallSprites[3];
+        else if (!up && !dw && !rt && lt) // lt only (1)
+            wall.GetComponent<SpriteRenderer>().sprite = WallSprites[4];
+
+        else if (up && !dw && rt && !lt) // up and right (2)
+            wall.GetComponent<SpriteRenderer>().sprite = WallSprites[5];
+        else if (!up && dw && rt && !lt) // right and down(2)
+            wall.GetComponent<SpriteRenderer>().sprite = WallSprites[6];
+        else if (!up && dw && !rt && lt) // down and left(2)
+            wall.GetComponent<SpriteRenderer>().sprite = WallSprites[7];
+        else if (up && !dw && !rt && lt) // left and up (2)
+            wall.GetComponent<SpriteRenderer>().sprite = WallSprites[8];
+
+        else if (up && dw && !rt && !lt) //top and bottom (2)
+            wall.GetComponent<SpriteRenderer>().sprite = WallSprites[9];
+        else if (!up && !dw && rt && lt) //left and right (2)
+            wall.GetComponent<SpriteRenderer>().sprite = WallSprites[10];
+
+        else if (up && dw && rt && !lt) // up and right and down (3)
+            wall.GetComponent<SpriteRenderer>().sprite = WallSprites[11];
+        else if (!up && dw && rt && lt) // right and down and left(2)
+            wall.GetComponent<SpriteRenderer>().sprite = WallSprites[12];
+        else if (up && dw && !rt && lt) // down and left and up(2)
+            wall.GetComponent<SpriteRenderer>().sprite = WallSprites[13];
+        else if (up && !dw && rt && lt) // left and up and right(2)
+            wall.GetComponent<SpriteRenderer>().sprite = WallSprites[14];
+        
+        else if (up && dw && rt && lt) //all (4)
+            wall.GetComponent<SpriteRenderer>().sprite = WallSprites[15];
+    }
+
     void buildWall()
     {
 
@@ -469,6 +539,9 @@ public class gameBoard : MonoBehaviour
                 //openMenu("Structure");
                 currentWalkability = false;
                 currentEnemy = false;
+                updateWall(thisWall, Mathf.FloorToInt(selectedTile.x), Mathf.FloorToInt(selectedTile.y), 0);
+                
+
             }
             else
             {
@@ -765,10 +838,13 @@ public class gameBoard : MonoBehaviour
 
     void Update()
     {
-        updateMarketIncome();       
-        updateResourceText();
+        if (!pause)
+        {
+            updateMarketIncome();
+            updateResourceText();
+        }
 
-        if (Input.GetKeyDown(KeyCode.A))
+        if (Input.GetKeyDown(KeyCode.Z))
         {
             buildArrowTower();
         }
@@ -776,15 +852,15 @@ public class gameBoard : MonoBehaviour
         {
             buildCannonTower();
         }
-        if (Input.GetKeyDown(KeyCode.H))
+        if (Input.GetKeyDown(KeyCode.V))
         {
             buildHolyTower();
         }
-        if (Input.GetKeyDown(KeyCode.W))
+        if (Input.GetKeyDown(KeyCode.X))
         {
             buildWizardTower();
         }
-        if (Input.GetKeyDown(KeyCode.Z))
+        if (Input.GetKeyDown(KeyCode.Q))
         {
             buildWall();
         }
@@ -803,6 +879,13 @@ public class gameBoard : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.K))
         {
             buildMarket();
+        }
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            if (pause)
+                pause = false;
+            else
+                pause = true;
         }
 
     }
