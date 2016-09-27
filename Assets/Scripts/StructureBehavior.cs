@@ -75,6 +75,7 @@ public class StructureBehavior : MonoBehaviour {
         {
             UpdateStructurePanel();
             homeSquare.SendMessage("updateTerrainUI");
+            homeSquare.SendMessage("updateStructureUI");
         }
     }
 

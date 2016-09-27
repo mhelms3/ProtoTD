@@ -3,6 +3,7 @@ using System.Collections;
 
 public class generatorScript : MonoBehaviour {
 
+    
     public GameObject[] enemy;
     public int baseEnemyNumber;
     public int enemyVariableNumber;
@@ -38,10 +39,11 @@ public class generatorScript : MonoBehaviour {
 	void Start () {        
         StructureBehavior bs = GetComponent<StructureBehavior>();
         cgb = (gameBoard)FindObjectOfType(typeof(gameBoard));
+        enemy = cgb.enemyType;
         positionX = bs.positionX;
         positionY = bs.positionY;
         pauseCounter = 0;
-        isActive = true;
+        isActive = cgb.activeEnemies;
 }
 	
 	// Update is called once per frame

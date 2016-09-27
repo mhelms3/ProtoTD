@@ -12,6 +12,8 @@ public class gameBoard : MonoBehaviour
     public int playerWorkers;
     public int playerSoldiers;
 
+    public bool activeEnemies;
+
     private bool pause = false;
 
     public GameObject arrowTower;
