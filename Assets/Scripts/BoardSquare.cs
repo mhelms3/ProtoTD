@@ -14,10 +14,10 @@ public class BoardSquare : MonoBehaviour {
     public float gcost;
     public float hcost;
     public BoardSquare parent;
-    public BoardTerrain squareTerrain;    
+    //public BoardTerrain squareTerrain;    
     //private SpriteRenderer squareSprite;
 
-    public GameObject foundation = null;
+    //public GameObject foundation = null;
     public GameObject structure = null;
     public GameObject thisSquare = null;
     public string squareName;
@@ -39,7 +39,6 @@ public class BoardSquare : MonoBehaviour {
         if (structure != null)
             if (structure.tag == "Wall")
             {
-                Debug.Log("Wall Detected at:" + positionX + " " + positionY);
                 return true;
             }
         return false;
@@ -133,45 +132,33 @@ public class BoardSquare : MonoBehaviour {
 
     void updateStructureUI()
     {
-        Debug.Log("No crash 0");
+        
 
         if (cgb == null)
             cgb = (gameBoard)FindObjectOfType(typeof(gameBoard));
 
-        Debug.Log("No crash 1");
+        
         if (structure != null)
         {
-            Debug.Log("structure");
             structure.SendMessage("UpdateStructurePanel");
-            Debug.Log("No crash 1.1");
             //cgb.SendMessage("openMenu", "Structure");
             StructureBehavior sb = structure.GetComponent<StructureBehavior>();
             sb.isSelected = true;
         }
         else if (foundation != null)
         {
-            Debug.Log("foundation");
+        
             foundation.SendMessage("UpdateStructurePanel");
-            Debug.Log("No crash 1.2");
             //cgb.SendMessage("openMenu", "Build");
         }
         else
         {
             UpdateStructurePanel();
-            Debug.Log("No crash 1.3");
             //cgb.SendMessage("openMenu", "Build");
         }
-
-        Debug.Log("No crash 1.4");
         cgb.SendMessage("deselectCurrentStructure");
-
         cgb.selectedTile = new Vector2(positionX, positionY);
         cgb.selector.transform.position = new Vector3(positionX + 1, positionY + 1, 0);
-
-
-        Debug.Log("Position[" + positionX + "," + positionY + "] Name:" + squareName + " W:" + wood + " S:" + stone + " F:" + food);
-
-
     }
 
     void OnMouseDown()

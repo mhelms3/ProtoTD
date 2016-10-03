@@ -280,14 +280,19 @@ public class StructureBehavior : MonoBehaviour {
         if (Input.GetKeyDown(KeyCode.Backspace) && isSelected)
         {
             gameBoard cgb = (gameBoard)FindObjectOfType(typeof(gameBoard));
-            if (buildingType != "Castle")
+            if (buildingType != "Castle" && cgb!=null)
             {
                 float refundPercentage = 1.00f;
                 if (!buildFlag)
                     refundPercentage = .50f;                
                 refund(refundPercentage, cgb);
-                freeWorkers(cgb);
+                if(buildingType == "Resource")
+                    freeWorkers(cgb);
                 destroyThis();
+            }
+            else if (cgb == null)
+            {
+                Debug.Log("No CGB in StructureBehavior");
             }
             else
             {

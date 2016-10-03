@@ -31,9 +31,9 @@ public class towerScript : MonoBehaviour {
         Vector3 position = transform.position;
         foreach (GameObject go in targetObjects)
         {
-            //print("---checking target "+ go.name +" at " + go.transform.position);
+           //print("---checking target "+ go.name +" at " + go.transform.position);
             float curDistance = getDistance(go.transform.position, position);
-            //print("---checking target " + go.name + " at " + go.transform.position + " distance:" + curDistance);
+           //print("---checking target " + go.name + " at " + go.transform.position + " distance:" + curDistance);
             if (curDistance < distance)
             {
                 closest = go;

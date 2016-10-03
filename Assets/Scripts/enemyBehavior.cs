@@ -55,7 +55,7 @@ public class enemyBehavior : MonoBehaviour {
     {
         
         float ratio = hitPoints / maxPoints;
-        print("updatebarAAA: dmg "+ ratio);
+        //print("updatebarAAA: dmg "+ ratio);
         if (ratio > .66)
             healthBar.color = Color.green;
         else if (ratio > .33)
@@ -149,7 +149,7 @@ public class enemyBehavior : MonoBehaviour {
     {
         if (attackCycle < .001)
         {
-            print("Attacking");
+            //print("Attacking");
             Vector3 startingPos = new Vector3(transform.position.x + .25f, transform.position.y - .5f, transform.position.z);
             GameObject ammo = Instantiate(enemyAmmo, startingPos, Quaternion.identity) as GameObject;
             ammoScript aScript = ammo.GetComponent<ammoScript>();
@@ -194,8 +194,9 @@ public class enemyBehavior : MonoBehaviour {
     {
         Vector3 position = transform.position;
         Vector3 diff = targetObject.transform.position - position;
-        float curDistance = diff.sqrMagnitude;
-        if (curDistance < (attackRange*1.42))
+        float curDistance = Mathf.Sqrt(diff.sqrMagnitude);
+        //print("ePos:"+position+" tPos"+ targetObject.transform.position+ " diff" + diff+ " Distance to target:" + curDistance);
+        if (curDistance < (attackRange*1.43))
         {
             attackTarget();
         }
@@ -224,7 +225,7 @@ public class enemyBehavior : MonoBehaviour {
         maxPoints = hitPoints;
         attackCycle = attackSpeed;
         targetObject = null;
-        targetType = "Tower";
+        targetType = "Castle";
         target = new Vector2(0, 0);
         hasPath = false;
         getHealthBar();

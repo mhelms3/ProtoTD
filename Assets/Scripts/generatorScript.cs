@@ -30,9 +30,11 @@ public class generatorScript : MonoBehaviour {
 
     void generateEnemy(int type)
     {
-        float newPosx = positionX + (Random.value * 2) - 1;
-        float newPosy = positionY + (Random.value * 2) - 1;
-        GameObject e = Instantiate(enemy[type], new Vector3(newPosx, newPosy, 1), Quaternion.identity) as GameObject;        
+        //float newPosx = positionX + (Random.value * 1) - .5f;
+        //float newPosy = positionY + (Random.value * 1) - .5f;
+        //GameObject e = Instantiate(enemy[type], new Vector3(newPosx, newPosy, 1), Quaternion.identity) as GameObject;
+
+        GameObject e = Instantiate(enemy[type], new Vector3(positionX, positionY, 1), Quaternion.identity) as GameObject;        
         cgb.SendMessage("addEnemyToBoard", e);
     }
 
@@ -53,13 +55,14 @@ public class generatorScript : MonoBehaviour {
         if (isActive)
         {
             enemyCheckCounter+= Time.deltaTime;
-            if (enemyCheckCounter > 1)
+            if (enemyCheckCounter > 2)
             {
                 enemyCumulativeFrequency += enemyFrequency;
                 if (Random.value < enemyCumulativeFrequency)
                 {
                     productionOn = true;
                     numberRemaining = Mathf.CeilToInt(baseEnemyNumber + (Random.value * enemyVariableNumber));
+                    //numberRemaining = 1;
                     enemyCumulativeFrequency = 0;
                 }
                 enemyCheckCounter = 0;

@@ -4,6 +4,8 @@ using UnityEngine.UI;
 
 public class gameBoard : MonoBehaviour
 {
+    public static bool isPaused = false;
+
     public int startingEnemies;
     public int difficultySetting;
     public string playerRace;
@@ -13,9 +15,6 @@ public class gameBoard : MonoBehaviour
     public int playerSoldiers;
 
     public bool activeEnemies;
-
-    private bool pause = false;
-
     public GameObject arrowTower;
     public GameObject cannonTower;
     public GameObject wizardtower;
@@ -526,7 +525,7 @@ public class gameBoard : MonoBehaviour
             Debug.Log("Building Wall");
             if (playerStone > wallStone)
             {
-                Vector3 currentLocation = new Vector3(selectedTile.x, selectedTile.y, 0);
+
                 GameObject thisWall = Instantiate(wall, new Vector3(selectedTile.x + 1, selectedTile.y + 1, 0), Quaternion.identity) as GameObject;
 
                 assignStructure(Mathf.FloorToInt(selectedTile.x), Mathf.FloorToInt(selectedTile.y), thisWall, false);
@@ -537,7 +536,7 @@ public class gameBoard : MonoBehaviour
                 sb.woodCost = 0;
                 sb.stoneCost = wallStone;
                 playerStone -= wallStone;
-                Debug.Log("Wall Built at " + currentLocation);
+                updateResourceText();
                 //openMenu("Structure");
                 currentWalkability = false;
                 currentEnemy = false;
@@ -564,7 +563,7 @@ public class gameBoard : MonoBehaviour
         {
             if (playerWood > woodRec && playerStone > stoneRec)
             {
-                Vector3 currentLocation = new Vector3(selectedTile.x, selectedTile.y, 0);
+
                 GameObject thisTower = Instantiate(tower, new Vector3(selectedTile.x + 1, selectedTile.y + 1, 0), Quaternion.identity) as GameObject;
                 assignStructure(Mathf.FloorToInt(selectedTile.x), Mathf.FloorToInt(selectedTile.y), thisTower, false);
                 StructureBehavior sb = (StructureBehavior)thisTower.GetComponent(typeof(StructureBehavior));
@@ -575,7 +574,7 @@ public class gameBoard : MonoBehaviour
                 sb.stoneCost = stoneRec;
                 playerWood -= woodRec;
                 playerStone -= stoneRec;
-                Debug.Log("Tower Built at " + currentLocation);
+                updateResourceText();
                 openMenu("Structure");
                 currentWalkability = false;
                 currentEnemy = false;
@@ -621,11 +620,10 @@ public class gameBoard : MonoBehaviour
         else
         {
             GameObject thisBuilding;
-            Debug.Log("buildingType");
             if (playerWood >= woodReq && playerStone >= stoneReq && playerWorkers > 0)
             {
                 thisBuilding = Instantiate(resBuilding, new Vector3(selectedTile.x + 1, selectedTile.y + 1, 0), Quaternion.identity) as GameObject;
-                Vector3 currentLocation = new Vector3(selectedTile.x, selectedTile.y, 0);
+
                 assignStructure(Mathf.FloorToInt(selectedTile.x), Mathf.FloorToInt(selectedTile.y), thisBuilding, false);
                 StructureBehavior sb = (StructureBehavior)thisBuilding.GetComponent(typeof(StructureBehavior));
                 sb.buildingType = buildingType;
@@ -636,7 +634,7 @@ public class gameBoard : MonoBehaviour
                 playerWood -= woodReq;
                 playerStone -= stoneReq;
                 playerWorkers -= 1;
-                Debug.Log(buildingType + " built at " + currentLocation);
+                updateResourceText();
                 openMenu("Structure");
             }
             else if (playerWorkers < 1)
@@ -655,23 +653,19 @@ public class gameBoard : MonoBehaviour
 
     void buildMine()
     {
-        buildResourceBuilding("Mine", mine, 100, 100);
-        Debug.Log("Mine");
+        buildResourceBuilding("Mine", mine, 100, 100);    
     }   
     void buildMill()
     {
-        buildResourceBuilding("Mill", mill, 100, 100);
-        Debug.Log("Mill");
+        buildResourceBuilding("Mill", mill, 100, 100);       
     }
     void buildFarm()
     {
-        buildResourceBuilding("Farm", farm, 100, 100);
-        Debug.Log("Farm");
+        buildResourceBuilding("Farm", farm, 100, 100);        
     }
     void buildMarket()
     {
-        buildResourceBuilding("Market", market, 100, 100);
-        Debug.Log("Market");
+        buildResourceBuilding("Market", market, 100, 100);       
     }
 
 
@@ -840,10 +834,22 @@ public class gameBoard : MonoBehaviour
 
     void Update()
     {
-        if (!pause)
+        
+        if(Input.GetKeyDown(KeyCode.Space))
         {
-            updateMarketIncome();
-            updateResourceText();
+            if (isPaused)
+            {
+                Time.timeScale = 1.0f;
+                isPaused = false;
+                Debug.Log("Not Paused");
+
+            }
+            else
+            {
+                Time.timeScale = 0.0f;
+                isPaused = true;
+                Debug.Log("Paused");
+            }
         }
 
         if (Input.GetKeyDown(KeyCode.Z))
@@ -882,13 +888,7 @@ public class gameBoard : MonoBehaviour
         {
             buildMarket();
         }
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            if (pause)
-                pause = false;
-            else
-                pause = true;
-        }
+        
 
     }
 }
