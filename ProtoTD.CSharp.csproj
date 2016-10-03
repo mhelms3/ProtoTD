@@ -74,7 +74,9 @@
     <Compile Include="Assets\Scripts\foundationScript.cs" />
     <Compile Include="Assets\Scripts\gameBoard.cs" />
     <Compile Include="Assets\Scripts\generatorScript.cs" />
+    <Compile Include="Assets\Scripts\node.cs" />
     <Compile Include="Assets\Scripts\pathFindingScript.cs" />
+    <Compile Include="Assets\Scripts\pathingGrid.cs" />
     <Compile Include="Assets\Scripts\resourceBuildingScript.cs" />
     <Compile Include="Assets\Scripts\towerScript.cs" />
   </ItemGroup>

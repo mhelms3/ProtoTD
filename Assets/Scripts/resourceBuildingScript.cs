@@ -59,7 +59,7 @@ public class resourceBuildingScript : MonoBehaviour {
                     cgb.playerGold += resourceStore;
                 }
                 resourceStore = 0;
-                cgb.SendMessage("UpdateResourceText");
+                cgb.SendMessage("updateResourceText");
             }
 
         }

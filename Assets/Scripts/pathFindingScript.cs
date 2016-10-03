@@ -3,11 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 
+
+
 public class pathFindingScript : MonoBehaviour {
 
-    public BoardSquare[,] boardGrid;
-    public List<BoardSquare> finalPath;
-    gameBoard cgb;
+    //public BoardSquare[,] boardGrid;
+    public node[,] boardGrid;
+    public List<node> finalPath;
+    public int dimX, dimY;
+    
 
     Vector2 getGridCoord(Vector2 v)
     {
@@ -17,9 +21,9 @@ public class pathFindingScript : MonoBehaviour {
         return v2;
     }
 
-    public List<BoardSquare> getSquareNeighbors(BoardSquare b)
+    public List<node> getSquareNeighbors(node b)
     {
-        List<BoardSquare> neighbors = new List<BoardSquare>();
+        List<node> neighbors = new List<node>();
         int posX = b.positionX;
         int posY = b.positionY;
         for (int x = -1; x < 2; x++)
@@ -33,7 +37,7 @@ public class pathFindingScript : MonoBehaviour {
                 {
                     int newX = posX + x;
                     int newY = posY + y;
-                    if (newX >= 0 && newX < cgb.tileSizeX && newY >= 0 && newY < cgb.tileSizeY)
+                    if (newX >= 0 && newX < dimX && newY >= 0 && newY < dimY)
                     {
                         
                         neighbors.Add(boardGrid[newX, newY]);
@@ -46,6 +50,7 @@ public class pathFindingScript : MonoBehaviour {
         return neighbors;
     }
 
+    /*
     void FindPathVectors (object[] o)
     {   
         
@@ -60,10 +65,11 @@ public class pathFindingScript : MonoBehaviour {
         FindPath(v1, v2, go);
         
     }
+    */
 
     void clearBoardGrid()
     {
-        foreach (BoardSquare s in boardGrid)
+        foreach (node s in boardGrid)
         {
             s.gcost = 0;
             s.hcost = 0;
@@ -71,34 +77,34 @@ public class pathFindingScript : MonoBehaviour {
         }
     }
 
-    void FindPath (Vector2 _starting, Vector2 _end, GameObject mobileGO)
+    public List<node> FindPath (Vector2 _starting, Vector2 _end)
     {
-        //print("FP Target" + _starting.x+", " + _starting.y);
-        //print("FP Destingation" + _end.x + ", " + _end.y);
+        print("FP Target" + _starting.x+", " + _starting.y);
+        print("FP Destingation" + _end.x + ", " + _end.y);
         //print("FP GameObject Name" + mobileGO.name +" Position:"+ mobileGO.transform.position);
 
-        BoardSquare startNode = boardGrid[Mathf.FloorToInt(_starting.x), Mathf.CeilToInt(_starting.y)];
-        BoardSquare endNode = boardGrid[Mathf.FloorToInt(_end.x), Mathf.CeilToInt(_end.y)];
+        node startNode = boardGrid[Mathf.FloorToInt(_starting.x), Mathf.CeilToInt(_starting.y)];
+        node endNode = boardGrid[Mathf.FloorToInt(_end.x), Mathf.CeilToInt(_end.y)];
         
         //print("Start Node (Target)" + startNode.positionX + ", " + startNode.positionY);
         //print("End Node (Dest)" + endNode.positionX + ", " + endNode.positionY);
 
-        List<BoardSquare> openSet = new List<BoardSquare>();
-        HashSet<BoardSquare> closedSet = new HashSet<BoardSquare>();
+        List<node> openSet = new List<node>();
+        HashSet<node> closedSet = new HashSet<node>();
         openSet.Add(startNode);
 
-        enemyBehavior eb = mobileGO.GetComponent<enemyBehavior>();
+        //enemyBehavior eb = mobileGO.GetComponent<enemyBehavior>();
 
         
         while (openSet.Count > 0)
         {
-            BoardSquare currentNode = openSet[0];
+            node currentNode = openSet[0];
             for (int i = 1; i < openSet.Count; i++)
             {
                 if (openSet[i].fcost < currentNode.fcost || openSet[i].fcost == openSet[i].fcost && openSet[i].hcost < openSet[i].hcost)
                 {
                     currentNode = openSet[i];
-                     //print("Current Node X:" + currentNode.positionX + " Y:" + currentNode.positionY + " fCost"+currentNode.fcost);
+                     print("Current Node X:" + currentNode.positionX + " Y:" + currentNode.positionY + " fCost"+currentNode.fcost);
                 }
             }
             openSet.Remove(currentNode);
@@ -109,14 +115,12 @@ public class pathFindingScript : MonoBehaviour {
             if (checkDistanceOne(currentNode, endNode))
             {
                 finalPath = retracePath(currentNode, startNode);
-                eb.myPath = finalPath;
-                eb.hasPath = true;
                 clearBoardGrid();
-                //Debug.Log("Path Success");
-                return;
+                Debug.Log("Path Success");
+                return finalPath;
             }
 
-            foreach (BoardSquare neighbor in getSquareNeighbors(currentNode))
+            foreach (node neighbor in getSquareNeighbors(currentNode))
             {
                 if(!neighbor.isWalkable || closedSet.Contains(neighbor))
                 {
@@ -138,12 +142,14 @@ public class pathFindingScript : MonoBehaviour {
                 }
             }
         }
+        Debug.Log("No Path Found!!");
+        return openSet;
     }
 
-    private List<BoardSquare> retracePath(BoardSquare end, BoardSquare begin)
+    private List<node> retracePath(node end, node begin)
     {
-        BoardSquare currentNode = end;
-        List<BoardSquare> path = new List<BoardSquare>();
+        node currentNode = end;
+        List<node> path = new List<node>();
         while (currentNode != begin)
         {
             path.Add(currentNode);
@@ -154,14 +160,14 @@ public class pathFindingScript : MonoBehaviour {
     }
 
 
-    private bool checkDistanceOne (BoardSquare a, BoardSquare b)
+    private bool checkDistanceOne (node a, node b)
     {
         if (getDistance(a, b) <= 14)
             return true;
         else
             return false;
     }
-    private float getDistance(BoardSquare a, BoardSquare b)
+    private float getDistance(node a, node b)
     {
         float disX = Mathf.Abs(a.positionX - b.positionX);
         float disY = Mathf.Abs(a.positionY - b.positionY);
@@ -172,16 +178,22 @@ public class pathFindingScript : MonoBehaviour {
 	// Use this for initialization
 
 	void Start () {
-        cgb = (gameBoard)FindObjectOfType(typeof(gameBoard));
-        GameObject[,] tempGrid = cgb.boardTile;
-        boardGrid = new BoardSquare[cgb.tileSizeX, cgb.tileSizeY];
-        foreach(GameObject go in tempGrid)
+        
+        gameBoard cgb = (gameBoard)FindObjectOfType(typeof(gameBoard));
+        dimX = cgb.tileSizeX;
+        dimY = cgb.tileSizeY;
+        boardGrid = cgb.pathGrid;
+        /*
+        node[,] boardGrid = cgb.pathGrid;
+        boardGrid = new node[cgb.tileSizeX, cgb.tileSizeY];
+        foreach(node n in boardGrid)
         {
-            BoardSquare tempBS = (BoardSquare)go.GetComponent(typeof(BoardSquare));
+            /////////////////node tempBS = (node)go.GetComponent(typeof(node));!!!!!!!!!!!!!!!!!!!!!!!!!
             int _x = tempBS.positionX;
             int _y = tempBS.positionY;
             boardGrid[_x, _y] = tempBS;
         }
+        */
 	}
 	
 	// Update is called once per frame

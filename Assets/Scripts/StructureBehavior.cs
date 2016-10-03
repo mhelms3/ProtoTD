@@ -140,12 +140,20 @@ public class StructureBehavior : MonoBehaviour {
     {
         if (buildingType == null)
             structureName = foundationMaterial + " Foundation";
-        else if(buildingType == "Ruin")
+        else if (buildingType == "Ruin")
+        {
             structureName = foundationMaterial + " Ruin";
-        else if(buildingSubType == null || buildingSubType == "")
-            structureName = structureMaterial + " " + buildingType + "(" + foundationMaterial + "[F])";
+        }
+        else if (buildingSubType == null || buildingSubType == "")
+        {
+            //structureName = structureMaterial + " " + buildingType + "(" + foundationMaterial + "[F])";
+            structureName = structureMaterial + " " + buildingType;
+        }
         else
-             structureName = structureMaterial + " " + buildingType + ", " + buildingSubType + "(" + foundationMaterial + "[F])";
+        {
+            //structureName = structureMaterial + " " + buildingType + ", " + buildingSubType + "(" + foundationMaterial + "[F])";
+            structureName = structureMaterial + " " + buildingType + ", " + buildingSubType;
+        }
     }
 
     void updateMaterialType(string s, bool isFoundation)

@@ -21,7 +21,7 @@ public class enemyBehavior : MonoBehaviour {
     public GameObject targetObject;
     public GameObject enemyAmmo;
 
-    public List<BoardSquare> myPath;
+    public List<node> myPath;
     public string targetType;
     public bool isConfounded; //use this if enemy cannot find path to closest target type
     public bool hasPath;
@@ -119,7 +119,7 @@ public class enemyBehavior : MonoBehaviour {
 
     public void acquireTarget()
     {
-        //print("finding target");
+        print("finding target");
         GameObject[] targetObjects = GameObject.FindGameObjectsWithTag(targetType);
         GameObject closest = null;
         closest = findClosestObject(targetObjects);
@@ -143,6 +143,7 @@ public class enemyBehavior : MonoBehaviour {
             if (!anyTargetsLeft)
                 print("END GAME");
         }
+        print("TARGET: " + targetObject.name);
     }
 
     public void attackTarget()
@@ -162,19 +163,34 @@ public class enemyBehavior : MonoBehaviour {
 
     public void findPath()
     {
+        /*
         gameBoard cgb = (gameBoard)FindObjectOfType(typeof(gameBoard));
         pathFindingScript pfs = cgb.GetComponent<pathFindingScript>();
-        Vector2 currentPosition = new Vector2(transform.position.x, transform.position.y);
+
+        
         object[] passVectors = new object[3];
+        Vector2 currentPosition = new Vector2(transform.position.x, transform.position.y);
         passVectors[0] = currentPosition;
         target.x = targetObject.transform.position.x;
         target.y = targetObject.transform.position.y;
-        
+
         passVectors[1] = target;
         passVectors[2] = gameObject;
 
         //Debug.Log(" Target:" + target);
         pfs.SendMessage("FindPathVectors", passVectors);
+        */
+
+        pathFindingScript pfs = GetComponentInParent<pathFindingScript>();
+        target.x = targetObject.transform.position.x;
+        target.y = targetObject.transform.position.y;
+        myPath = pfs.FindPath(new Vector2(transform.position.x, transform.position.y), target);
+        if (myPath == null)
+            print("FUDGY");
+        else if (myPath.Count == 0)
+            print("ZEROID");
+
+
     }
 
     public void moveToTarget()
@@ -222,6 +238,7 @@ public class enemyBehavior : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+        
         maxPoints = hitPoints;
         attackCycle = attackSpeed;
         targetObject = null;
@@ -230,6 +247,7 @@ public class enemyBehavior : MonoBehaviour {
         hasPath = false;
         getHealthBar();
         updateStatusBars();
+        
 }	
 	// Update is called once per frame
 	void Update () {
@@ -255,7 +273,6 @@ public class enemyBehavior : MonoBehaviour {
 
         if (targetObject == null && !isAsleep)
         {
-         
             hasPath = false;
             myPath.Clear();
             acquireTarget();

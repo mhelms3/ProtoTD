@@ -17,7 +17,7 @@ public class BoardSquare : MonoBehaviour {
     //public BoardTerrain squareTerrain;    
     //private SpriteRenderer squareSprite;
 
-    //public GameObject foundation = null;
+    public GameObject foundation = null;
     public GameObject structure = null;
     public GameObject thisSquare = null;
     public string squareName;

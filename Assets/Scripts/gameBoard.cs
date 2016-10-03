@@ -14,6 +14,9 @@ public class gameBoard : MonoBehaviour
     public int playerWorkers;
     public int playerSoldiers;
 
+    public node[,] pathGrid;
+    
+
     public bool activeEnemies;
     public GameObject arrowTower;
     public GameObject cannonTower;
@@ -319,7 +322,9 @@ public class gameBoard : MonoBehaviour
         int[,] terrainGenArray = new int[tileSizeX, tileSizeY];
         for (int i = 0; i < tileSizeX; i++)
             for (int j = 0; j < tileSizeY; j++)
+            {
                 terrainGenArray[i, j] = 1; //initialize to grasslands
+            }
 
         generateTerrain(terrainGenArray, .2f, 6, 6);
         generateTerrain(terrainGenArray, .1f, 7, 4);
@@ -335,6 +340,8 @@ public class gameBoard : MonoBehaviour
         //string[] ruinMaterial = { "Marble", "Granite", "Obsidian", "Limestone", "Basalt", "Brownstone", "Flagstone", "Quadratum" };
 
         boardTile = new GameObject[tileSizeX, tileSizeY];
+        pathGrid = new node[tileSizeX, tileSizeY];
+
 
         for (int i = 0; i < tileSizeX; i++)
             for (int j = 0; j < tileSizeY; j++)
@@ -349,6 +356,10 @@ public class gameBoard : MonoBehaviour
                 srTerrain = (SpriteRenderer)currentTerrain.GetComponent(typeof(SpriteRenderer));
 
                 boardTile[i, j] = Instantiate(squarePrototype, new Vector3(i + 1, j + 1, 0), Quaternion.identity) as GameObject;
+
+                pathGrid[i, j] = new node(i, j);
+                pathGrid[i, j].moveCost = bt.moveCost;
+
                 bs = (BoardSquare)boardTile[i, j].GetComponent(typeof(BoardSquare));
                 srSquare = (SpriteRenderer)boardTile[i, j].GetComponent(typeof(SpriteRenderer));
 
@@ -711,20 +722,25 @@ public class gameBoard : MonoBehaviour
 
     void OnDrawGizmos()
     {
-        List<BoardSquare> bs = new List<BoardSquare>();
+        List<node> bs = new List<node>();
         pathFindingScript pfs = gameObject.GetComponent<pathFindingScript>();
         bs = pfs.finalPath;
-        if (boardTile != null)
+        if (boardTile != null && bs != null)
         {
             foreach (GameObject go in boardTile)
             {
                 BoardSquare b = go.GetComponent<BoardSquare>();
                 if (!b.isWalkable)
                     Gizmos.color = Color.red;
-                else if (bs.Contains(b))
-                    Gizmos.color = Color.blue;
                 else
                     Gizmos.color = Color.white;
+                
+                foreach (node n in bs)
+                {
+                    if ((n.positionX == b.positionX) && (n.positionY == b.positionY))
+                        Gizmos.color = Color.blue;
+                }
+
                 Gizmos.DrawWireCube(new Vector3(b.positionX + .5f, b.positionY - .5f, 0), Vector3.one * .9f);
             }
         }
