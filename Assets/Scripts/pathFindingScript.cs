@@ -79,8 +79,8 @@ public class pathFindingScript : MonoBehaviour {
 
     public List<node> FindPath (Vector2 _starting, Vector2 _end)
     {
-        //sw.Reset();
-        //sw.Start();
+        sw.Reset();
+        sw.Start();
         //print("FP Target" + _starting.x+", " + _starting.y);
         //print("FP Destingation" + _end.x + ", " + _end.y);
         //print("FP GameObject Name" + mobileGO.name +" Position:"+ mobileGO.transform.position);
@@ -119,8 +119,8 @@ public class pathFindingScript : MonoBehaviour {
                 finalPath = retracePath(currentNode, startNode);
                 clearBoardGrid();
                 //Debug.Log("Path Success");
-                //sw.Stop();
-                //print("Path Time" + sw.ElapsedMilliseconds + " in ms");
+                sw.Stop();
+                print("Path Time" + sw.ElapsedMilliseconds + " in ms");
                 return finalPath;
             }
 

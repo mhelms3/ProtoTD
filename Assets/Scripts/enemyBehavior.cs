@@ -20,11 +20,13 @@ public class enemyBehavior : MonoBehaviour {
     private bool triggerDeathFlag = false;
     public Vector2 target;
     public GameObject targetObject;
+    public GameObject tempTarget;
     public GameObject enemyAmmo;
 
     public List<node> myPath;
     public string targetType;
     public bool isConfounded; //use this if enemy cannot find path to closest target type
+    public bool pathIsCurrent; //if nothing in the world changes, path should remain current, and can skip pathfinding
     public bool hasPath;
     public bool isAsleep;
     public float sleepCounter;
@@ -74,7 +76,7 @@ public class enemyBehavior : MonoBehaviour {
         foreach (GameObject go in objs)
         {
             Vector3 diff = go.transform.position - position;
-            float curDistance = diff.sqrMagnitude;
+            float curDistance = Mathf.Sqrt(diff.sqrMagnitude);
             if (curDistance < distance)
             {
                 closest = go;
@@ -92,7 +94,7 @@ public class enemyBehavior : MonoBehaviour {
         foreach (GameObject go in objs)
         {
             Vector3 diff = go.transform.position - position;
-            float curDistance = diff.sqrMagnitude;
+            float curDistance = Mathf.Sqrt(diff.sqrMagnitude);
             if (curDistance < distance)
             {
                 closest = go;
@@ -184,12 +186,13 @@ public class enemyBehavior : MonoBehaviour {
         target.x = targetObject.transform.position.x;
         target.y = targetObject.transform.position.y;
         myPath = pfs.FindPath(new Vector2(transform.position.x, transform.position.y), target);
-        if (myPath == null)
-            print("FUDGY");
+
+        if (myPath.Count > 0)
+            pathIsCurrent = true;
         else if (myPath.Count == 0)
-            print("ZEROID");
-
-
+            print("Path Zero Problem");
+        else if (myPath == null)
+            print("Path Null Problem");
     }
 
     public void moveToTarget()
@@ -248,28 +251,41 @@ public class enemyBehavior : MonoBehaviour {
         updateStatusBars();
         acquireTarget();
         pfs = GetComponentInParent<pathFindingScript>();
+        isAsleep = false;
 
     }	
+
+    void accelerate()
+    {
+        reaquireClock = (.70f + (Random.value *.25f)) * reaquireFrequency;
+        pathIsCurrent = false;
+    }
+
 	// Update is called once per frame
 	void Update () {
 
         reaquireClock += Time.deltaTime;
         if (reaquireClock > reaquireFrequency)
         {
+            tempTarget = targetObject;
             reaquireClock = 0;
             acquireTarget();
+            if (tempTarget != targetObject || pathIsCurrent == false)
+                hasPath = false;
         }
 
         if (attackCycle > 0)
             attackCycle -= Time.deltaTime;
+
+        
         if (isAsleep)
             sleepCounter += Time.deltaTime;
-        if (sleepCounter > 15)
+        if (sleepCounter > 5)
         {
             isAsleep = false;
             sleepCounter = 0;
         }
-
+        
 
 
         if (targetObject == null && !isAsleep)
@@ -277,9 +293,14 @@ public class enemyBehavior : MonoBehaviour {
             hasPath = false;
             myPath.Clear();
             acquireTarget();
+            
             if (targetObject == null)
             {
                 isAsleep = true;
+            }
+            else
+            {
+                hasPath = false;
             }
 
         }
@@ -290,12 +311,14 @@ public class enemyBehavior : MonoBehaviour {
             {
                 findPath();
                 if (myPath.Count == 0)
-                { 
+                {
                     hasPath = false;
                     changeTargetClosest();
                     if (targetObject != null)
                         print("No path found. Changing target to:" + targetObject.name + " at" + targetObject.transform.position);
                 }
+                else
+                    hasPath = true;
             }
             engageTarget();
         }

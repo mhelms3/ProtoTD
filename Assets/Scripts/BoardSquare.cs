@@ -169,11 +169,6 @@ public class BoardSquare : MonoBehaviour {
             updateStructureUI();
         }
     }
-    
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+     
        
 }

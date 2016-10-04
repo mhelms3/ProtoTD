@@ -81,7 +81,7 @@ public class gameBoard : MonoBehaviour
     public Vector3 home; //keep
 
     public GameObject[] enemyType;
-    public List<GameObject> playerStructures = new List<GameObject>();
+    public List<GameObject> playerStructures = new List<GameObject>(256);
     public List<GameObject> enemies;
 
     public Sprite[] WallSprites;
@@ -421,8 +421,7 @@ public class gameBoard : MonoBehaviour
     {
         foreach (GameObject e in enemies)
         {
-            e.SendMessage("acquireTarget");
-            e.SendMessage("findPath");
+            e.SendMessage("accelerate");
         }
         currentEnemy = true;
     }
@@ -808,7 +807,7 @@ public class gameBoard : MonoBehaviour
 
     void Awake()
     {
-        enemies = new List<GameObject>();
+        enemies = new List<GameObject>(256);
         initializePlayer();
         updateResourceText();
         playerRaceText.text = playerRace;

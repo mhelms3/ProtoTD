@@ -50,7 +50,7 @@ public class towerScript : MonoBehaviour {
     public float getDistance(Vector3 a, Vector3 b)
     {
         Vector3 diff = a - b;
-        return (diff.sqrMagnitude);
+        return (Mathf.Sqrt(diff.sqrMagnitude));
     }
 
     public void shootAmmo()
