@@ -16,6 +16,7 @@ public class enemyBehavior : MonoBehaviour {
     public float reaquireFrequency;
     public float reaquireClock = 0;
 
+    private pathFindingScript pfs;
     private bool triggerDeathFlag = false;
     public Vector2 target;
     public GameObject targetObject;
@@ -119,7 +120,7 @@ public class enemyBehavior : MonoBehaviour {
 
     public void acquireTarget()
     {
-        print("finding target");
+        //print("finding target");
         GameObject[] targetObjects = GameObject.FindGameObjectsWithTag(targetType);
         GameObject closest = null;
         closest = findClosestObject(targetObjects);
@@ -143,7 +144,7 @@ public class enemyBehavior : MonoBehaviour {
             if (!anyTargetsLeft)
                 print("END GAME");
         }
-        print("TARGET: " + targetObject.name);
+        //print("TARGET: " + targetObject.name);
     }
 
     public void attackTarget()
@@ -180,8 +181,6 @@ public class enemyBehavior : MonoBehaviour {
         //Debug.Log(" Target:" + target);
         pfs.SendMessage("FindPathVectors", passVectors);
         */
-
-        pathFindingScript pfs = GetComponentInParent<pathFindingScript>();
         target.x = targetObject.transform.position.x;
         target.y = targetObject.transform.position.y;
         myPath = pfs.FindPath(new Vector2(transform.position.x, transform.position.y), target);
@@ -247,8 +246,10 @@ public class enemyBehavior : MonoBehaviour {
         hasPath = false;
         getHealthBar();
         updateStatusBars();
-        
-}	
+        acquireTarget();
+        pfs = GetComponentInParent<pathFindingScript>();
+
+    }	
 	// Update is called once per frame
 	void Update () {
 
@@ -288,10 +289,12 @@ public class enemyBehavior : MonoBehaviour {
             if (!hasPath)
             {
                 findPath();
-                if (!hasPath)
-                {
-                    print("Bollux.No path found");  
+                if (myPath.Count == 0)
+                { 
+                    hasPath = false;
                     changeTargetClosest();
+                    if (targetObject != null)
+                        print("No path found. Changing target to:" + targetObject.name + " at" + targetObject.transform.position);
                 }
             }
             engageTarget();

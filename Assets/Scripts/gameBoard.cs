@@ -154,12 +154,16 @@ public class gameBoard : MonoBehaviour
         GameObject tile = boardTile[x, y];
         BoardSquare thisSquare = (BoardSquare)tile.GetComponent(typeof(BoardSquare));
         if (thisSquare.structure == null)
+        {
             thisSquare.structure = g;
+            pathGrid[x, y].isWalkable = false;
+        }
         else if (overwrite)
         {
             Destroy(thisSquare.structure);
             Debug.Log("Structure Destroyed by Overwrite");
             thisSquare.structure = g;
+            pathGrid[x, y].isWalkable = false;
         }
         else
             Debug.Log("Overloaded Structure Error");
@@ -170,6 +174,7 @@ public class gameBoard : MonoBehaviour
         int x = Mathf.FloorToInt(v2.x);
         int y = Mathf.FloorToInt(v2.y);
         GameObject tile = boardTile[x,y];
+        pathGrid[x,y].isWalkable = true;
         BoardSquare thisSquare = (BoardSquare)tile.GetComponent(typeof(BoardSquare));
         thisSquare.structure = null;
         Debug.Log("Structure popped");
@@ -179,7 +184,7 @@ public class gameBoard : MonoBehaviour
     {
         int x = Mathf.FloorToInt(v2.x);
         int y = Mathf.FloorToInt(v2.y);
-        GameObject tile = boardTile[x, y];
+        GameObject tile = boardTile[x, y];        
         BoardSquare thisSquare = (BoardSquare)tile.GetComponent(typeof(BoardSquare));
         if (thisSquare.structure == null)
             return false;
@@ -204,18 +209,19 @@ public class gameBoard : MonoBehaviour
         assignStructure(Mathf.RoundToInt(startingPositionX-1), Mathf.RoundToInt(startingPositionY-1), tempObject, true);        
         addMarketValue(100);
         home = new Vector3(startingPositionX, startingPositionY, -1);
-
         selectedTile = new Vector2(startingPositionX-1, startingPositionY-1);
         selector.transform.position = new Vector3(startingPositionX, startingPositionY, 0);       
         sb.isSelected = true;
 
-        GameObject bt = boardTile[startingPositionX, startingPositionY];
+        GameObject bt = boardTile[startingPositionX-1, startingPositionY-1];
         BoardSquare bs = bt.GetComponent<BoardSquare>();
+        sb.homeSquare = bs;
         bs.SendMessage("UpdateStructurePanel");
+        pathGrid[startingPositionX - 1, startingPositionY - 1].isWalkable = false;
             
 
 
-        Debug.Log(home);
+        //Debug.Log(home);
     }
 
 
@@ -381,7 +387,6 @@ public class gameBoard : MonoBehaviour
                     bs.foundation = tempObject;
                     currentRnd = Mathf.CeilToInt(Random.value * ruinMaterial.Length);                    
                     tempObject.SendMessage("RuinStart", ruinMaterial[currentRnd - 1]);
-                    tempObject.SendMessage("SquareAssignment", bs);
                 }
                 */
             }
@@ -533,7 +538,7 @@ public class gameBoard : MonoBehaviour
         }
         else
         {
-            Debug.Log("Building Wall");
+            //Debug.Log("Building Wall");
             if (playerStone > wallStone)
             {
 
@@ -693,7 +698,8 @@ public class gameBoard : MonoBehaviour
 
     void getWalkableSquares()
     {
-        print("updating walkability");
+        //print("updating walkability");
+        /*
         foreach (GameObject go in boardTile)
         {
             int layerMask = 1 << 8;
@@ -702,8 +708,17 @@ public class gameBoard : MonoBehaviour
             //b.isWalkable = !(Physics.CheckBox(checkArea, Vector3.one*.2f, Quaternion.identity, layerMask));
             Vector2 checkArea = new Vector2(b.positionX + .5f, b.positionY - .5f);
             b.isWalkable = !(Physics2D.BoxCast(checkArea, Vector2.one * .2f, 0, Vector2.zero, Mathf.Infinity, layerMask));
+        }
+        */
 
-
+        foreach (node n in pathGrid)
+        {
+            int layerMask = 1 << 8;
+            //BoardSquare b = go.GetComponent<BoardSquare>();
+            //Vector3 checkArea = new Vector3(b.positionX+.5f, b.positionY-.5f, 0);
+            //b.isWalkable = !(Physics.CheckBox(checkArea, Vector3.one*.2f, Quaternion.identity, layerMask));
+            Vector2 checkArea = new Vector2(n.positionX + .5f, n.positionY - .5f);
+            n.isWalkable = !(Physics2D.BoxCast(checkArea, Vector2.one * .2f, 0, Vector2.zero, Mathf.Infinity, layerMask));
         }
         currentWalkability = true;
     }
@@ -722,28 +737,32 @@ public class gameBoard : MonoBehaviour
 
     void OnDrawGizmos()
     {
-        List<node> bs = new List<node>();
-        pathFindingScript pfs = gameObject.GetComponent<pathFindingScript>();
-        bs = pfs.finalPath;
-        if (boardTile != null && bs != null)
+        /*
+        if (enemies.Count > 1)
         {
-            foreach (GameObject go in boardTile)
+            List<node> epath = new List<node>();
+            pathFindingScript pfs = enemies[0].GetComponent<pathFindingScript>();
+            epath = pfs.finalPath;
+            if (boardTile != null && epath != null)
             {
-                BoardSquare b = go.GetComponent<BoardSquare>();
-                if (!b.isWalkable)
-                    Gizmos.color = Color.red;
-                else
-                    Gizmos.color = Color.white;
-                
-                foreach (node n in bs)
+                foreach (node n in pathGrid)
                 {
-                    if ((n.positionX == b.positionX) && (n.positionY == b.positionY))
-                        Gizmos.color = Color.blue;
-                }
+                    if (!n.isWalkable)
+                        Gizmos.color = Color.red;
+                    else
+                        Gizmos.color = Color.white;
 
-                Gizmos.DrawWireCube(new Vector3(b.positionX + .5f, b.positionY - .5f, 0), Vector3.one * .9f);
+                    foreach (node ep in epath)
+                    {
+                        if ((ep.positionX == n.positionX) && (ep.positionY == n.positionY))
+                            Gizmos.color = Color.blue;
+                    }
+
+                    Gizmos.DrawWireCube(new Vector3(n.positionX + .5f, n.positionY - .5f, 0), Vector3.one * .9f);
+                }
             }
         }
+        */
     }
     
 

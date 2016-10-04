@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
-using System;
+using System.Diagnostics;
 
 
 
@@ -11,8 +10,9 @@ public class pathFindingScript : MonoBehaviour {
     public node[,] boardGrid;
     public List<node> finalPath;
     public int dimX, dimY;
+    Stopwatch sw;
     
-
+    
     Vector2 getGridCoord(Vector2 v)
     {
         Vector2 v2 = new Vector2();
@@ -79,8 +79,10 @@ public class pathFindingScript : MonoBehaviour {
 
     public List<node> FindPath (Vector2 _starting, Vector2 _end)
     {
-        print("FP Target" + _starting.x+", " + _starting.y);
-        print("FP Destingation" + _end.x + ", " + _end.y);
+        //sw.Reset();
+        //sw.Start();
+        //print("FP Target" + _starting.x+", " + _starting.y);
+        //print("FP Destingation" + _end.x + ", " + _end.y);
         //print("FP GameObject Name" + mobileGO.name +" Position:"+ mobileGO.transform.position);
 
         node startNode = boardGrid[Mathf.FloorToInt(_starting.x), Mathf.CeilToInt(_starting.y)];
@@ -104,7 +106,7 @@ public class pathFindingScript : MonoBehaviour {
                 if (openSet[i].fcost < currentNode.fcost || openSet[i].fcost == openSet[i].fcost && openSet[i].hcost < openSet[i].hcost)
                 {
                     currentNode = openSet[i];
-                     print("Current Node X:" + currentNode.positionX + " Y:" + currentNode.positionY + " fCost"+currentNode.fcost);
+                     //print("Current Node X:" + currentNode.positionX + " Y:" + currentNode.positionY + " fCost"+currentNode.fcost);
                 }
             }
             openSet.Remove(currentNode);
@@ -116,7 +118,9 @@ public class pathFindingScript : MonoBehaviour {
             {
                 finalPath = retracePath(currentNode, startNode);
                 clearBoardGrid();
-                Debug.Log("Path Success");
+                //Debug.Log("Path Success");
+                //sw.Stop();
+                //print("Path Time" + sw.ElapsedMilliseconds + " in ms");
                 return finalPath;
             }
 
@@ -142,7 +146,7 @@ public class pathFindingScript : MonoBehaviour {
                 }
             }
         }
-        Debug.Log("No Path Found!!");
+        //Debug.Log("No Path Found!!");
         return openSet;
     }
 
@@ -183,6 +187,7 @@ public class pathFindingScript : MonoBehaviour {
         dimX = cgb.tileSizeX;
         dimY = cgb.tileSizeY;
         boardGrid = cgb.pathGrid;
+        sw = new Stopwatch();
         /*
         node[,] boardGrid = cgb.pathGrid;
         boardGrid = new node[cgb.tileSizeX, cgb.tileSizeY];

@@ -26,7 +26,7 @@ public class buttonBehaviorScript : MonoBehaviour {
             if (t.tag == "HelpText")
             {
                 helpText = t;
-                print(helpText.text);
+                //print(helpText.text);
                 helpText.enabled = false;
 
             }
