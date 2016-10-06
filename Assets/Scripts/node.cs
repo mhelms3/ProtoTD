@@ -1,13 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class node {
+public class node :IHeapItem<node> {
 
     public bool isWalkable;
     public float hcost, gcost;
     public node parent;
     public int positionX, positionY;
     public float moveCost;
+    int heapIndex;
     
     public node (int _x, int _y)
     {
@@ -25,4 +26,27 @@ public class node {
             return (gcost + hcost);
         }
     }
+
+    public int HeapIndex
+    {
+        get
+        {
+            return heapIndex;
+        }
+        set
+        {
+            heapIndex = value;
+        }
+    }
+
+    public int CompareTo(node nodeToCompare)
+    {
+        int compare = fcost.CompareTo(nodeToCompare.fcost);
+        if (compare == 0)
+        {
+            compare = hcost.CompareTo(nodeToCompare.hcost);
+        }
+        return -compare;
+    }
+
 }

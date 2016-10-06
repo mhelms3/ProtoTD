@@ -79,8 +79,8 @@ public class pathFindingScript : MonoBehaviour {
 
     public List<node> FindPath (Vector2 _starting, Vector2 _end)
     {
-        sw.Reset();
-        sw.Start();
+        //sw.Reset();
+        //sw.Start();
         //print("FP Target" + _starting.x+", " + _starting.y);
         //print("FP Destingation" + _end.x + ", " + _end.y);
         //print("FP GameObject Name" + mobileGO.name +" Position:"+ mobileGO.transform.position);
@@ -91,16 +91,17 @@ public class pathFindingScript : MonoBehaviour {
         //print("Start Node (Target)" + startNode.positionX + ", " + startNode.positionY);
         //print("End Node (Dest)" + endNode.positionX + ", " + endNode.positionY);
 
-        List<node> openSet = new List<node>();
+        Heap<node> openSet = new Heap<node>(dimX*dimY);
         HashSet<node> closedSet = new HashSet<node>();
         openSet.Add(startNode);
 
         //enemyBehavior eb = mobileGO.GetComponent<enemyBehavior>();
 
         
-        while (openSet.Count > 0)
+        while (openSet.Count() > 0)
         {
-            node currentNode = openSet[0];
+            node currentNode = openSet.RemoveFirst();
+            /*
             for (int i = 1; i < openSet.Count; i++)
             {
                 if (openSet[i].fcost < currentNode.fcost || openSet[i].fcost == openSet[i].fcost && openSet[i].hcost < openSet[i].hcost)
@@ -110,6 +111,7 @@ public class pathFindingScript : MonoBehaviour {
                 }
             }
             openSet.Remove(currentNode);
+            */
             closedSet.Add(currentNode);
 
             
@@ -119,8 +121,8 @@ public class pathFindingScript : MonoBehaviour {
                 finalPath = retracePath(currentNode, startNode);
                 clearBoardGrid();
                 //Debug.Log("Path Success");
-                sw.Stop();
-                print("Path Time" + sw.ElapsedMilliseconds + " in ms");
+                //sw.Stop();
+                //print("Path Time" + sw.ElapsedMilliseconds + " in ms");
                 return finalPath;
             }
 
@@ -143,11 +145,13 @@ public class pathFindingScript : MonoBehaviour {
                     neighbor.parent = currentNode;
                     if (!openSet.Contains(neighbor))
                         openSet.Add(neighbor);
+                    else
+                        openSet.UpdateItem(neighbor);
                 }
             }
         }
         //Debug.Log("No Path Found!!");
-        return openSet;
+        return finalPath;
     }
 
     private List<node> retracePath(node end, node begin)

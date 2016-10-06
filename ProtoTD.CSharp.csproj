@@ -67,6 +67,7 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\BoardSquare.cs" />
     <Compile Include="Assets\Scripts\BoardTerrain.cs" />
+    <Compile Include="Assets\Scripts\Heap.cs" />
     <Compile Include="Assets\Scripts\StructureBehavior.cs" />
     <Compile Include="Assets\Scripts\ammoScript.cs" />
     <Compile Include="Assets\Scripts\buttonBehaviorScript.cs" />

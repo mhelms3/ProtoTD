@@ -530,7 +530,8 @@ public class gameBoard : MonoBehaviour
     void buildWall()
     {
 
-        float wallStone = 50;
+        float wallStone = 20;
+        float wallWood = 20;
         if (hasStructure(selectedTile))
         {
             Debug.Log("Tile has structure already");
@@ -538,7 +539,7 @@ public class gameBoard : MonoBehaviour
         else
         {
             //Debug.Log("Building Wall");
-            if (playerStone > wallStone)
+            if (playerStone > wallStone )
             {
 
                 GameObject thisWall = Instantiate(wall, new Vector3(selectedTile.x + 1, selectedTile.y + 1, 0), Quaternion.identity) as GameObject;
