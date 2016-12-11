@@ -273,8 +273,8 @@ public class gameBoard : MonoBehaviour
 
         for (int i = 0; i < seedCount; i++)
         {
-            int tempx = Mathf.CeilToInt(Random.value * (tileSizeX - 10)+5);
-            int tempy = Mathf.CeilToInt(Random.value * (tileSizeY - 10)+5);
+            int tempx = Mathf.CeilToInt(Random.value * (tileSizeX - 1));
+            int tempy = Mathf.CeilToInt(Random.value * (tileSizeY - 1));
             if (terrainArray[tempx, tempy] == 1)
                 terrainArray[tempx, tempy] = terrainType;
             else
@@ -332,11 +332,11 @@ public class gameBoard : MonoBehaviour
                 terrainGenArray[i, j] = 1; //initialize to grasslands
             }
 
-        generateTerrain(terrainGenArray, .2f, 6, 6);
-        generateTerrain(terrainGenArray, .1f, 7, 4);
-        generateTerrain(terrainGenArray, .1f, 2, 25);
-        generateTerrain(terrainGenArray, .1f, 8, 25);
-        generateTerrain(terrainGenArray, .1f, 9, 25);
+        generateTerrain(terrainGenArray, .09f, 6, 6); //STONE HILLS
+        generateTerrain(terrainGenArray, .07f, 7, 4); //WATER/SWAMP
+        generateTerrain(terrainGenArray, .15f, 2, 25); //LIGHT WOODS
+        generateTerrain(terrainGenArray, .05f, 8, 5); //WOODED HILLS
+        generateTerrain(terrainGenArray, .09f, 9, 25); //WOODS
 
 
         selector = Instantiate(selectorAnimation, new Vector3(startingPositionX+1, startingPositionY+1, 0), Quaternion.identity) as GameObject;

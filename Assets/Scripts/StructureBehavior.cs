@@ -5,6 +5,7 @@ using UnityEngine.EventSystems;
 
 public class StructureBehavior : MonoBehaviour {
 
+    public GameObject buildMenu;
     public int positionX;
     public int positionY;
     public float workerSpeed;
@@ -31,6 +32,8 @@ public class StructureBehavior : MonoBehaviour {
     public bool isSelected = false;
 
     public IList<string> specials = new List<string>();
+
+    
 
     //bool isFoundationOnly;
 
@@ -76,6 +79,13 @@ public class StructureBehavior : MonoBehaviour {
             UpdateStructurePanel();
             homeSquare.SendMessage("updateTerrainUI");
             homeSquare.SendMessage("updateStructureUI");
+
+            Toggle tog = buildMenu.GetComponent<Toggle>();
+            if (tog.isOn)
+            {
+                Animator anim = buildMenu.GetComponent<Animator>();
+                anim.Play("BuildingMenuSlideOut");
+            }
         }
     }
 
