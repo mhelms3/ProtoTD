@@ -408,11 +408,12 @@ public class gameBoard : MonoBehaviour
     {
         float xPo, yPo;
         GameObject eGo;
+        
         for(int i=0; i<startingEnemies; i++)
         {
-            xPo = Random.value * 7 +  8 ;
-            yPo = Random.value * 7 + 8;
-            eGo = Instantiate(enemyType[0], new Vector3(xPo, yPo, 1), Quaternion.identity) as GameObject;
+            xPo = Random.value * 5 +  home.x + 4;
+            yPo = Random.value * 5 +  home.y + 4;
+            eGo = Instantiate(enemyType[i%enemyType.Length], new Vector3(xPo, yPo, 1), Quaternion.identity) as GameObject;
             enemies.Add(eGo);
         }
     }
@@ -531,7 +532,7 @@ public class gameBoard : MonoBehaviour
     {
 
         float wallStone = 20;
-        float wallWood = 20;
+        //float wallWood = 20;
         if (hasStructure(selectedTile))
         {
             Debug.Log("Tile has structure already");

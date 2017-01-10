@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
 
 public class StructureBehavior : MonoBehaviour {
 
-    public GameObject buildMenu;
+    public GameObject buildMenu;    
     public int positionX;
     public int positionY;
     public float workerSpeed;
@@ -79,13 +79,18 @@ public class StructureBehavior : MonoBehaviour {
             UpdateStructurePanel();
             homeSquare.SendMessage("updateTerrainUI");
             homeSquare.SendMessage("updateStructureUI");
-
-            Toggle tog = buildMenu.GetComponent<Toggle>();
+            /*
+            Toggle tog = buildMenu.GetComponentInChildren<Toggle>();
+            Debug.Log("Tog?"+tog.isOn);
             if (tog.isOn)
             {
                 Animator anim = buildMenu.GetComponent<Animator>();
-                anim.Play("BuildingMenuSlideOut");
+                anim.Play("slideIn");
+                Debug.Log("Slide out");
             }
+            */
+            BuildingMenuScript bms = buildMenu.GetComponent<BuildingMenuScript>();
+            bms.updatePanel(this);
         }
     }
 
@@ -143,7 +148,8 @@ public class StructureBehavior : MonoBehaviour {
         integrity = 99;
         buildFlag = true;
         workerSpeed = 25;
-        barSprites = this.GetComponentsInChildren<SpriteRenderer>();        
+        barSprites = this.GetComponentsInChildren<SpriteRenderer>();
+        buildMenu = GameObject.Find("BuildingMenu");
     }
 
     void updateStructureName()
