@@ -9,6 +9,7 @@ public class BoardSquare : MonoBehaviour {
     public int positionX;
     public int positionY;
     public float moveCost;
+    public float buildTimeModifier;
     public bool isWalkable;
     
     public float gcost;

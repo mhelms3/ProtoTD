@@ -202,9 +202,8 @@ public class gameBoard : MonoBehaviour
         Vector3 startingPosition = new Vector3(startingPositionX, startingPositionY,0);
         GameObject tempObject = Instantiate(playerCastle, startingPosition, Quaternion.identity) as GameObject;
         StructureBehavior sb = (StructureBehavior)tempObject.GetComponent(typeof(StructureBehavior));
-        sb.foundationMaterial = "Granite";
-        sb.structureMaterial = "Granite";
-        sb.SendMessage("updateStructureName");
+        //sb.foundationMaterial = "Granite";
+        sb.updateMaterialType("Granite", 0);
         sb.marketValue = 100;
         assignStructure(Mathf.RoundToInt(startingPositionX-1), Mathf.RoundToInt(startingPositionY-1), tempObject, true);        
         addMarketValue(100);
@@ -375,6 +374,7 @@ public class gameBoard : MonoBehaviour
                 bs.food = initializeResources(bt.averageFoodValue);
                 bs.positionX = i;
                 bs.positionY = j;
+                bs.buildTimeModifier = bt.buildTimeMultiplier;
 
                 srSquare.sprite = srTerrain.sprite;
                
@@ -439,14 +439,15 @@ public class gameBoard : MonoBehaviour
         sb.workerSpeed = playerBuildSpeed;
         sb.integrity = 1;
         sb.percentComplete = 1;
-        sb.structureMaterial = "Wood";
-        sb.foundationMaterial = "Stone";
+        sb.updateMaterialType("Basic Materials", 0);
         sb.buildFlag = true;
         sb.isSelected = true;
 
-        GameObject tile = boardTile[sb.positionX, sb.positionY];
-        BoardSquare thisSquare = (BoardSquare)tile.GetComponent(typeof(BoardSquare));
-        sb.homeSquare = thisSquare;
+        //GameObject tile = boardTile[sb.positionX, sb.positionY];
+        //BoardSquare thisSquare = (BoardSquare)tile.GetComponent(typeof(BoardSquare));
+        //sb.SquareAssignment((BoardSquare)boardTile[sb.positionX, sb.positionY].GetComponent(typeof(BoardSquare)));
+        sb.homeSquare = (BoardSquare)boardTile[sb.positionX, sb.positionY].GetComponent(typeof(BoardSquare)); 
+        Debug.Log("HomeSquareAssignment =" + sb.homeSquare.squareName);
     }
 
     void deselectCurrentStructure()

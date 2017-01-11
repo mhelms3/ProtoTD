@@ -9,6 +9,7 @@ public class StructureBehavior : MonoBehaviour {
     public int positionX;
     public int positionY;
     public float workerSpeed;
+    public float supplyLevel;
 
     public float percentComplete;
     public float integrity;
@@ -21,10 +22,12 @@ public class StructureBehavior : MonoBehaviour {
     public string buildingType;
     public string buildingSubType;
     public BoardSquare homeSquare;
+    public GameObject closestSource; // for now, default to Castle; change this when supply depots become available.
 
-    public string structureMaterial;
-    public string foundationMaterial;
-
+    private string []structureMaterial = new string[5];
+    private int buildingLevel;
+    //private _unit[] occupants = new _unit[10];
+    //private _item[] placedItem = new _unit[5];
     public float woodCost;
     public float stoneCost;
 
@@ -67,7 +70,7 @@ public class StructureBehavior : MonoBehaviour {
         return (tempString);
     }
 
-    void SquareAssignment(BoardSquare bs)
+    public void SquareAssignment(BoardSquare bs)
     {
         homeSquare = bs;
     }
@@ -89,8 +92,19 @@ public class StructureBehavior : MonoBehaviour {
                 Debug.Log("Slide out");
             }
             */
-            BuildingMenuScript bms = buildMenu.GetComponent<BuildingMenuScript>();
-            bms.updatePanel(this);
+            buildingMenuScript bms = buildMenu.GetComponent<buildingMenuScript>();
+
+            if (buildingType == "Tower")
+            {
+                towerScript ts = gameObject.GetComponent<towerScript>();
+                bms.updatePanel(this, ts);
+            }
+            else
+            {
+                bms.updatePanel(this, null);
+            }
+
+
         }
     }
 
@@ -125,10 +139,17 @@ public class StructureBehavior : MonoBehaviour {
         if (temp != null)
         {
             aText = temp.GetComponent<Text>();
-            if (structureMaterial == null || structureMaterial == "")
-                aText.text = "Material: " + foundationMaterial;
-            else
-                aText.text = "Material: " + foundationMaterial + "(F) and " + structureMaterial;
+            int count = 0;
+            foreach (string s in structureMaterial)
+            {
+                if (s != null)
+                {
+                    count++;
+                    aText.text = "Level "+count+ " Material: " + s +"\n";
+                }
+                else
+                    break;
+            }            
         }
 
         temp = GameObject.Find("Special Properties");
@@ -140,7 +161,9 @@ public class StructureBehavior : MonoBehaviour {
         }       
     }
 
+   
 
+    
     // Use this for initialization
     void Awake()
     {
@@ -148,36 +171,37 @@ public class StructureBehavior : MonoBehaviour {
         integrity = 99;
         buildFlag = true;
         workerSpeed = 25;
+        buildingLevel = 0;
         barSprites = this.GetComponentsInChildren<SpriteRenderer>();
         buildMenu = GameObject.Find("BuildingMenu");
+        
+       
+
     }
 
     void updateStructureName()
     {
         if (buildingType == null)
-            structureName = foundationMaterial + " Foundation";
+            structureName = "Null void";
         else if (buildingType == "Ruin")
         {
-            structureName = foundationMaterial + " Ruin";
+            structureName = "Ruin";
         }
         else if (buildingSubType == null || buildingSubType == "")
         {
             //structureName = structureMaterial + " " + buildingType + "(" + foundationMaterial + "[F])";
-            structureName = structureMaterial + " " + buildingType;
+            structureName = buildingType;
         }
         else
         {
             //structureName = structureMaterial + " " + buildingType + ", " + buildingSubType + "(" + foundationMaterial + "[F])";
-            structureName = structureMaterial + " " + buildingType + ", " + buildingSubType;
+            structureName = buildingSubType + " " + buildingType;
         }
     }
 
-    void updateMaterialType(string s, bool isFoundation)
+    public void updateMaterialType(string s, int materialLevel)
     {
-        if (isFoundation)
-            foundationMaterial = s;            
-        else
-            structureMaterial = s;
+        structureMaterial[materialLevel] = s;
         updateStructureName();
     }
     // Update is called once per frame
@@ -223,10 +247,66 @@ public class StructureBehavior : MonoBehaviour {
         }
     }
 
-    // Use this for initialization
+    private GameObject findClosestSource()
+    {
+        float minDistance = 999999;
+        float distanceToThis = 0;
+        GameObject theSource = null;
+        //IList<GameObject> sources = new List<GameObject>();
+        //sources = GameObject.FindGameObjectsWithTag("Supply");
+        GameObject[] castles = GameObject.FindGameObjectsWithTag("Castle");
+
+        //sources.Add(castle);
+
+        if (castles.Length > 0)
+        {
+            foreach (GameObject s in castles)
+            {
+                distanceToThis = Vector3.Distance(this.transform.position, s.transform.position);
+                if (distanceToThis < minDistance)
+                {
+                    minDistance = distanceToThis;
+                    theSource = s;
+                }
+            }
+        }
+
+        return (theSource);
+    }
+
+    private void calculateSupplyLevel()
+    {
+        GameObject closestSource = findClosestSource();
+        float distanceToThis = Vector3.Distance(this.transform.position, closestSource.transform.position);
+        if (distanceToThis < 3)
+            supplyLevel = 1;
+        else if (distanceToThis < 20)
+            supplyLevel = 1 - ((distanceToThis - 3) / 20);
+        else
+            supplyLevel = .05f;
+
+    }
+
+    private void calculateWorkerSpeed()
+    {
+        workerSpeed = (workerSpeed/homeSquare.buildTimeModifier) * supplyLevel;
+        //workerSpeed = workerSpeed * supplyLevel;
+
+        if (homeSquare == null)
+            Debug.Log("hs=Null");
+        else if(homeSquare.buildTimeModifier == 0)
+            Debug.Log("hsBTM=0");
+        else
+            Debug.Log("WS = " + workerSpeed + " supplyLevel = " + supplyLevel + " terrainMod =" + homeSquare.buildTimeModifier);
+
+       
+    }
+
     void Start () {
         updateStructureName();
         hasDestroyOrder = false;
+        calculateSupplyLevel();
+        calculateWorkerSpeed();        
     }
 
     void refund(float percentRefund, gameBoard cgb)

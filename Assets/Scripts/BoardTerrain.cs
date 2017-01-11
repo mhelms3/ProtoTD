@@ -3,11 +3,11 @@ using System.Collections;
 
 public class BoardTerrain : MonoBehaviour {
     public string terrainName;
-    public int averageWoodValue;    //base resources   
-    public int averageStoneValue;   //base resources
-    public int averageFoodValue;    //base resources
-    public float moveCost;          //base cost to move into square
-
+    public int averageWoodValue;      //base resources   
+    public int averageStoneValue;     //base resources
+    public int averageFoodValue;      //base resources
+    public float moveCost;            //base cost to move into square
+    public float buildTimeMultiplier; //base time multiplier to build on square
     /*
     public float bonusWood;         //odds of finding a bonus resource of this type
     public float bonusStone;        //odds of finding a bonus resource of this type

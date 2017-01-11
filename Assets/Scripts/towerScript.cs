@@ -3,11 +3,7 @@ using UnityEngine.EventSystems;
 using System.Collections;
 
 public class towerScript : MonoBehaviour {
-    public int towerLevel;
     public int towerType;
-    public int soldiers;
-    public int maxSoldiers;
-
     public bool isActive;
 
     public float rateOfFire;
@@ -71,14 +67,10 @@ public class towerScript : MonoBehaviour {
 
 
     }
-    public void calculateMaxSoldiers()
-    {
-        maxSoldiers = 2 * towerLevel;
-    }
+    
     // Use this for initialization
     void Start () {
-        soldiers = 0;
-        maxSoldiers = 2;
+        
         attackTimer = 0;
         //attackRange = 5000;
         isActive = false;                

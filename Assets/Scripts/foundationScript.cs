@@ -52,7 +52,7 @@ public class foundationScript : MonoBehaviour {
 	void RuinStart (string s)
     {
         
-        sb.foundationMaterial = s;
+        //sb.foundationMaterial = s;
         sb.structureName = "Ruin";
         sb.SendMessage("updateStructureName");
         
