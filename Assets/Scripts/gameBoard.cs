@@ -4,6 +4,10 @@ using UnityEngine.UI;
 
 public class gameBoard : MonoBehaviour
 {
+
+    /// <summary>
+    /// add character spells, lay lines, places of power (place wizard towers near to recharge mana)
+    /// </summary>
     public static bool isPaused = false;
 
     public int startingEnemies;
@@ -81,7 +85,7 @@ public class gameBoard : MonoBehaviour
     public Vector3 home; //keep
 
     public GameObject[] enemyType;
-    public List<GameObject> playerStructures = new List<GameObject>(256);
+    public List<GameObject> playerStructures = new List<GameObject>(2048);
     public List<GameObject> enemies;
 
     public Sprite[] WallSprites;
@@ -177,7 +181,7 @@ public class gameBoard : MonoBehaviour
         pathGrid[x,y].isWalkable = true;
         BoardSquare thisSquare = (BoardSquare)tile.GetComponent(typeof(BoardSquare));
         thisSquare.structure = null;
-        Debug.Log("Structure popped");
+        //Debug.Log("Structure popped");
     }
 
     bool hasStructure(Vector2 v2)
@@ -447,7 +451,7 @@ public class gameBoard : MonoBehaviour
         //BoardSquare thisSquare = (BoardSquare)tile.GetComponent(typeof(BoardSquare));
         //sb.SquareAssignment((BoardSquare)boardTile[sb.positionX, sb.positionY].GetComponent(typeof(BoardSquare)));
         sb.homeSquare = (BoardSquare)boardTile[sb.positionX, sb.positionY].GetComponent(typeof(BoardSquare)); 
-        Debug.Log("HomeSquareAssignment =" + sb.homeSquare.squareName);
+        //Debug.Log("HomeSquareAssignment =" + sb.homeSquare.squareName);
     }
 
     void deselectCurrentStructure()
@@ -878,14 +882,14 @@ public class gameBoard : MonoBehaviour
             {
                 Time.timeScale = 1.0f;
                 isPaused = false;
-                Debug.Log("Not Paused");
+                //Debug.Log("Not Paused");
 
             }
             else
             {
                 Time.timeScale = 0.0f;
                 isPaused = true;
-                Debug.Log("Paused");
+                //Debug.Log("Paused");
             }
         }
 

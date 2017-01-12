@@ -9,6 +9,7 @@ public class StructureBehavior : MonoBehaviour {
     public int positionX;
     public int positionY;
     public float workerSpeed;
+    public int buildingLevel;
     public float supplyLevel;
 
     public float percentComplete;
@@ -25,12 +26,13 @@ public class StructureBehavior : MonoBehaviour {
     public GameObject closestSource; // for now, default to Castle; change this when supply depots become available.
 
     private string []structureMaterial = new string[5];
-    private int buildingLevel;
+
+    //private _material[] structureMaterial = new _material[5];
     //private _unit[] occupants = new _unit[10];
     //private _item[] placedItem = new _unit[5];
+
     public float woodCost;
     public float stoneCost;
-
     public float marketValue;
     public bool isSelected = false;
 
@@ -48,13 +50,13 @@ public class StructureBehavior : MonoBehaviour {
     
     void OnTriggerEnter2D(Collider2D col)
     {
-        print("Hit building");
+        //print("Hit building");
         if (col.gameObject.tag == "EnemyAmmo")
         {
             ammoScript aScript = col.gameObject.GetComponent<ammoScript>();
             float damage = Mathf.Round(Random.value * (aScript.damageUpper - aScript.damageLower) + aScript.damageLower);
             integrity -= damage;
-            print("Building hit for " + damage + " damage");
+            //print("Building hit for " + damage + " damage");
             updateStatusBars();
             Destroy(col.gameObject);
         }
@@ -82,16 +84,6 @@ public class StructureBehavior : MonoBehaviour {
             UpdateStructurePanel();
             homeSquare.SendMessage("updateTerrainUI");
             homeSquare.SendMessage("updateStructureUI");
-            /*
-            Toggle tog = buildMenu.GetComponentInChildren<Toggle>();
-            Debug.Log("Tog?"+tog.isOn);
-            if (tog.isOn)
-            {
-                Animator anim = buildMenu.GetComponent<Animator>();
-                anim.Play("slideIn");
-                Debug.Log("Slide out");
-            }
-            */
             buildingMenuScript bms = buildMenu.GetComponent<buildingMenuScript>();
 
             if (buildingType == "Tower")
@@ -99,9 +91,14 @@ public class StructureBehavior : MonoBehaviour {
                 towerScript ts = gameObject.GetComponent<towerScript>();
                 bms.updatePanel(this, ts);
             }
-            else
+            else if (buildingType == "Resource")
             {
-                bms.updatePanel(this, null);
+                resourceBuildingScript rbs = gameObject.GetComponent<resourceBuildingScript>();
+                bms.updatePanel(this, rbs);
+            }
+            else 
+            {
+                bms.updatePanel(this);
             }
 
 
@@ -144,8 +141,8 @@ public class StructureBehavior : MonoBehaviour {
             {
                 if (s != null)
                 {
-                    count++;
                     aText.text = "Level "+count+ " Material: " + s +"\n";
+                    count++;
                 }
                 else
                     break;
@@ -182,19 +179,17 @@ public class StructureBehavior : MonoBehaviour {
     void updateStructureName()
     {
         if (buildingType == null)
-            structureName = "Null void";
+            structureName = "Null void [error]";
         else if (buildingType == "Ruin")
         {
             structureName = "Ruin";
         }
         else if (buildingSubType == null || buildingSubType == "")
         {
-            //structureName = structureMaterial + " " + buildingType + "(" + foundationMaterial + "[F])";
             structureName = buildingType;
         }
         else
         {
-            //structureName = structureMaterial + " " + buildingType + ", " + buildingSubType + "(" + foundationMaterial + "[F])";
             structureName = buildingSubType + " " + buildingType;
         }
     }
@@ -249,35 +244,49 @@ public class StructureBehavior : MonoBehaviour {
 
     private GameObject findClosestSource()
     {
-        float minDistance = 999999;
-        float distanceToThis = 0;
-        GameObject theSource = null;
-        //IList<GameObject> sources = new List<GameObject>();
-        //sources = GameObject.FindGameObjectsWithTag("Supply");
-        GameObject[] castles = GameObject.FindGameObjectsWithTag("Castle");
-
-        //sources.Add(castle);
-
-        if (castles.Length > 0)
+        
+        if (this.tag == "Castle")
+            return null;
+        else
         {
-            foreach (GameObject s in castles)
+            float minDistance = 999999;
+            float distanceToThis = 0;
+            GameObject theSource = null;
+            GameObject[] supplies = GameObject.FindGameObjectsWithTag("Supply");
+            GameObject[] castles = GameObject.FindGameObjectsWithTag("Castle");
+            GameObject[] allSupply = new GameObject[supplies.Length + castles.Length];
+
+            supplies.CopyTo(allSupply, 0);
+            castles.CopyTo(allSupply, supplies.Length);
+            if (allSupply.Length > 0)
             {
-                distanceToThis = Vector3.Distance(this.transform.position, s.transform.position);
-                if (distanceToThis < minDistance)
+                foreach (GameObject s in allSupply)
                 {
-                    minDistance = distanceToThis;
-                    theSource = s;
+                    if (this.transform.position != s.transform.position) //supply depots should not count themselves
+                    {
+                        distanceToThis = Vector3.Distance(this.transform.position, s.transform.position);
+                        //Debug.Log("Supply: " + s.name + " distance: " + distanceToThis.ToString("0.00"));
+                        if (distanceToThis < minDistance)
+                        {
+                            minDistance = distanceToThis;
+                            theSource = s;
+                        }
+                    }
                 }
             }
+            return (theSource);
         }
-
-        return (theSource);
     }
 
     private void calculateSupplyLevel()
     {
         GameObject closestSource = findClosestSource();
-        float distanceToThis = Vector3.Distance(this.transform.position, closestSource.transform.position);
+        float distanceToThis = 0;
+        if (closestSource != null)
+        {
+            distanceToThis = Vector3.Distance(this.transform.position, closestSource.transform.position);
+            //Debug.Log("Calculated Supply: " + closestSource.name + " distance: " + distanceToThis.ToString("0.00"));
+        }
         if (distanceToThis < 3)
             supplyLevel = 1;
         else if (distanceToThis < 20)
@@ -290,16 +299,7 @@ public class StructureBehavior : MonoBehaviour {
     private void calculateWorkerSpeed()
     {
         workerSpeed = (workerSpeed/homeSquare.buildTimeModifier) * supplyLevel;
-        //workerSpeed = workerSpeed * supplyLevel;
-
-        if (homeSquare == null)
-            Debug.Log("hs=Null");
-        else if(homeSquare.buildTimeModifier == 0)
-            Debug.Log("hsBTM=0");
-        else
-            Debug.Log("WS = " + workerSpeed + " supplyLevel = " + supplyLevel + " terrainMod =" + homeSquare.buildTimeModifier);
-
-       
+        //Debug.Log("Calculated Speed: " + workerSpeed + " supply: " + supplyLevel + "terrain effect: "+ homeSquare.buildTimeModifier);
     }
 
     void Start () {
@@ -319,7 +319,7 @@ public class StructureBehavior : MonoBehaviour {
     void freeWorkers(gameBoard cgb)
     {
        resourceBuildingScript buildingScript = gameObject.GetComponent<resourceBuildingScript>();
-       cgb.playerWorkers += buildingScript.workers;
+       //cgb.playerWorkers += buildingScript.workers;
     }
     
 
@@ -366,7 +366,7 @@ public class StructureBehavior : MonoBehaviour {
                 percentComplete = 100;
                 if (buildingType == "Tower")
                 {
-                    print("TOWER COMPLETE -- ACTIVATING");
+                    //print("TOWER COMPLETE -- ACTIVATING");
                     towerScript ts = gameObject.GetComponent<towerScript>();
                     ts.isActive = true;
                 }

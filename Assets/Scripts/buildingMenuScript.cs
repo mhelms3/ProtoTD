@@ -81,13 +81,24 @@ public class buildingMenuScript : MonoBehaviour
 
     public void updatePanel(StructureBehavior sb, towerScript ts)
     {
-
         updatePanelImage(sb.buildingType, sb.buildingSubType);
         updateBasicInfo(sb);
         if (ts != null)
             updateTowerInfo(ts);
-       
-        
+    }
+
+    public void updatePanel(StructureBehavior sb, resourceBuildingScript rbs)
+    {
+        updatePanelImage(sb.buildingType, sb.buildingSubType);
+        updateBasicInfo(sb);
+        //if (rbs != null)
+            //updateResourceBuildingInfo(rbs);
+    }
+
+    public void updatePanel(StructureBehavior sb)
+    {
+        updatePanelImage(sb.buildingType, sb.buildingSubType);
+        updateBasicInfo(sb);
     }
 }
 
