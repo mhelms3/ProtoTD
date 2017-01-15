@@ -9,9 +9,13 @@ public class towerScript : MonoBehaviour {
     public float rateOfFire;
     public float attackTimer;
     public float attackRange;
+    public float damageModifierLower;
+    public float damageModifierUpper;
+
 
     public GameObject towerAmmo;
     public GameObject attackTarget;
+    public StructureBehavior sb;
     public string targetType = "Enemy";
 
     public void makeActive()
@@ -49,6 +53,18 @@ public class towerScript : MonoBehaviour {
         return (Mathf.Sqrt(diff.sqrMagnitude));
     }
 
+    public void updateDamageModifiers()
+    {
+        damageModifierLower = Mathf.Pow(sb.buildingLevel, 1.1f);
+        damageModifierUpper = Mathf.Pow(sb.buildingLevel, 1.3f);
+    }
+
+    private void modifyDamage(ammoScript a)
+    {
+        a.damageLower = a.damageLower * (1+damageModifierLower);
+        a.damageUpper = a.damageUpper * (1+damageModifierUpper);
+    }
+
     public void shootAmmo()
     {
         if(getDistance(attackTarget.transform.position, transform.position)<attackRange)
@@ -59,22 +75,23 @@ public class towerScript : MonoBehaviour {
             GameObject ammo = Instantiate(towerAmmo, startingPos, Quaternion.identity) as GameObject;
             ammoScript aScript = ammo.GetComponent<ammoScript>();
             aScript.attackTarget = attackTarget;
+            modifyDamage(aScript);
             attackTimer = 0;
             findTarget();
 
             //giveammoChars
         }
-
-
     }
     
     // Use this for initialization
-    void Start () {
-        
+    void Start ()
+    {
         attackTimer = 0;
         //attackRange = 5000;
-        isActive = false;                
-	}
+        isActive = false;
+        sb = GetComponentInParent<StructureBehavior>();
+        updateDamageModifiers();
+    }
 
   
 

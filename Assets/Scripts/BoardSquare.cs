@@ -128,7 +128,7 @@ public class BoardSquare : MonoBehaviour {
     if (terrainText != null)
         terrainText.text = squareName;
 
-        Debug.Log("Position...terrain[" + positionX + "," + positionY + "] Name:" + squareName + " W:" + wood + " S:" + stone + " F:" + food);
+        //Debug.Log("Position...terrain[" + positionX + "," + positionY + "] Name:" + squareName + " W:" + wood + " S:" + stone + " F:" + food);
     }
 
     void updateStructureUI()

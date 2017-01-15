@@ -12,12 +12,18 @@ public class resourceBuildingScript : MonoBehaviour {
     
     
     private StructureBehavior sb;
-    private float [] resourceModifier = { .5f, 1f, 1f, 1f, 1f, 1f};
+    private float [] resourceModifier = { 0f, 0f, 0f, 0f, 0f, 0f};
     public float resourceStore;
     public float resourceShip;
     public string resourceType;
 
     
+    public float currentProduction()
+    {
+        return resourceModifier[sb.buildingLevel]*5*sb.supplyLevel;
+    }
+
+
     // Use this for initialization
     void Awake()
     {
@@ -106,7 +112,7 @@ public class resourceBuildingScript : MonoBehaviour {
         }
         else if (resourceType == "Gold")
         {
-            resourceModifier[0] = home.food + home.wood + home.stone / 600;
+            resourceModifier[0] = (home.food + home.wood + home.stone) / 600;
             resourceModifier[1] = resourceModifier[0] * 2;
         }
 
@@ -121,7 +127,7 @@ public class resourceBuildingScript : MonoBehaviour {
      
         if (isActive)
         {
-            resourceStore += 5*resourceModifier[sb.buildingLevel] * Time.deltaTime;
+            resourceStore += 5*resourceModifier[sb.buildingLevel] * sb.supplyLevel * Time.deltaTime;
             if (resourceStore > resourceShip)
             {
                 if (resourceType == "Stone")

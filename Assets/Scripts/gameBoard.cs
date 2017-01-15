@@ -32,6 +32,7 @@ public class gameBoard : MonoBehaviour
     public GameObject farm;
     public GameObject market;
 
+    public GameObject depot;
     public GameObject wall;
 
 
@@ -55,6 +56,8 @@ public class gameBoard : MonoBehaviour
     public Text playerWoodText;
     public Text playerStoneText;
     public Text playerFoodText;
+    public Text playerWorkersText;
+    public Text playerMarketValueText;
     public Text playerRaceText;
     public Text playerLevelText;
 
@@ -150,6 +153,8 @@ public class gameBoard : MonoBehaviour
         playerWoodText.text = Mathf.Round(playerWood).ToString();
         playerStoneText.text = Mathf.Round(playerStone).ToString();
         playerFoodText.text = Mathf.Round(playerFood).ToString();
+        playerWorkersText.text = Mathf.Round(playerWorkers).ToString();
+        playerMarketValueText.text = Mathf.Round(playerMarketValue).ToString();
     }
 
     void assignStructure(int x, int y, GameObject g, bool overwrite)
@@ -171,6 +176,7 @@ public class gameBoard : MonoBehaviour
         }
         else
             Debug.Log("Overloaded Structure Error");
+        updateMarketValue();
     }
 
     void popStructure(Vector2 v2)
@@ -195,10 +201,15 @@ public class gameBoard : MonoBehaviour
         else
             return true;
     }
-    void addMarketValue(float v)
+
+    public void updateMarketValue()
     {
-        playerMarketValue += v;
-        //add some cha-ching effect here, and highlight additional market value
+        playerMarketValue = 0;
+        foreach (GameObject g in playerStructures)
+        {
+            playerMarketValue += g.GetComponent<StructureBehavior>().marketValue;
+            updateResourceText();
+        }
     }
 
     void createCastle()
@@ -208,9 +219,8 @@ public class gameBoard : MonoBehaviour
         StructureBehavior sb = (StructureBehavior)tempObject.GetComponent(typeof(StructureBehavior));
         //sb.foundationMaterial = "Granite";
         sb.updateMaterialType("Granite", 0);
-        sb.marketValue = 100;
+        sb.marketValue = 1000;
         assignStructure(Mathf.RoundToInt(startingPositionX-1), Mathf.RoundToInt(startingPositionY-1), tempObject, true);        
-        addMarketValue(100);
         home = new Vector3(startingPositionX, startingPositionY, -1);
         selectedTile = new Vector2(startingPositionX-1, startingPositionY-1);
         selector.transform.position = new Vector3(startingPositionX, startingPositionY, 0);       
@@ -221,9 +231,7 @@ public class gameBoard : MonoBehaviour
         sb.homeSquare = bs;
         bs.SendMessage("UpdateStructurePanel");
         pathGrid[startingPositionX - 1, startingPositionY - 1].isWalkable = false;
-            
-
-
+        updateMarketValue();
         //Debug.Log(home);
     }
 
@@ -315,6 +323,16 @@ public class gameBoard : MonoBehaviour
                     }
                 }
             }
+        }
+    }
+
+    public void recalculateSupply()
+    {
+        foreach(GameObject ps in playerStructures)
+        {
+            StructureBehavior ps_sb = ps.GetComponent<StructureBehavior>();
+            ps_sb.calculateSupplyLevel();
+            ps_sb.calculateWorkerSpeed();
         }
     }
 
@@ -434,13 +452,13 @@ public class gameBoard : MonoBehaviour
     void deleteFromPlayerStructures(GameObject g)
     {
         playerStructures.Remove(g);
+        updateMarketValue();
     }
 
     void initializeNewStructure(StructureBehavior sb)
     {
         sb.positionX = Mathf.FloorToInt(selectedTile.x);
         sb.positionY = Mathf.FloorToInt(selectedTile.y);
-        sb.workerSpeed = playerBuildSpeed;
         sb.integrity = 1;
         sb.percentComplete = 1;
         sb.updateMaterialType("Basic Materials", 0);
@@ -450,8 +468,9 @@ public class gameBoard : MonoBehaviour
         //GameObject tile = boardTile[sb.positionX, sb.positionY];
         //BoardSquare thisSquare = (BoardSquare)tile.GetComponent(typeof(BoardSquare));
         //sb.SquareAssignment((BoardSquare)boardTile[sb.positionX, sb.positionY].GetComponent(typeof(BoardSquare)));
-        sb.homeSquare = (BoardSquare)boardTile[sb.positionX, sb.positionY].GetComponent(typeof(BoardSquare)); 
+        sb.homeSquare = (BoardSquare)boardTile[sb.positionX, sb.positionY].GetComponent(typeof(BoardSquare));
         //Debug.Log("HomeSquareAssignment =" + sb.homeSquare.squareName);
+        
     }
 
     void deselectCurrentStructure()
@@ -480,6 +499,26 @@ public class gameBoard : MonoBehaviour
         }
         else
             return false;
+    }
+
+    public StructureBehavior grabSelectedStructure()
+    {
+        GameObject tile = boardTile[Mathf.FloorToInt(selectedTile.x), Mathf.FloorToInt(selectedTile.y)];
+        BoardSquare thisSquare = (BoardSquare)tile.GetComponent(typeof(BoardSquare));
+        GameObject struc = thisSquare.structure;
+        StructureBehavior sb = struc.GetComponent<StructureBehavior>();
+        return sb;
+    }
+
+    public void upgradeBuilding()
+    {
+        if (hasStructure(selectedTile))
+        {
+            StructureBehavior sb = grabSelectedStructure();
+            sb.updgradeBuilding();
+            updateResourceText();
+            updateMarketValue();
+        }
     }
 
     void updateWall (GameObject wall, int x, int y, int i)
@@ -648,7 +687,8 @@ public class gameBoard : MonoBehaviour
 
                 assignStructure(Mathf.FloorToInt(selectedTile.x), Mathf.FloorToInt(selectedTile.y), thisBuilding, false);
                 StructureBehavior sb = (StructureBehavior)thisBuilding.GetComponent(typeof(StructureBehavior));
-                sb.buildingType = buildingType;
+                sb.buildingType = "Resource";
+                sb.buildingSubType = buildingType;
                 initializeNewStructure(sb);
 
                 sb.woodCost = woodReq;
@@ -671,6 +711,12 @@ public class gameBoard : MonoBehaviour
                     Debug.Log("Insufficient Stone");
             }
         }
+    }
+
+
+    void buildDepot()
+    {
+        buildResourceBuilding("Depot", depot, 1000, 1000);
     }
 
     void buildMine()
@@ -814,7 +860,7 @@ public class gameBoard : MonoBehaviour
 
     void Awake()
     {
-        enemies = new List<GameObject>(256);
+        enemies = new List<GameObject>(2048);
         initializePlayer();
         updateResourceText();
         playerRaceText.text = playerRace;
@@ -854,6 +900,14 @@ public class gameBoard : MonoBehaviour
         }
     }
     // Update is called once per frame
+
+  
+    void Start()
+    {
+        StructureBehavior sb =  grabSelectedStructure();
+        sb.calculateSupplyLevel();
+        sb.updateBuildingMenuPanel();
+    }
 
     void LateUpdate()
     {
@@ -909,27 +963,30 @@ public class gameBoard : MonoBehaviour
         {
             buildWizardTower();
         }
-        if (Input.GetKeyDown(KeyCode.Q))
+        if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             buildWall();
         }
-        if (Input.GetKeyDown(KeyCode.F))
+        if (Input.GetKeyDown(KeyCode.Alpha2))
         {
             buildFarm();
         }
-        if (Input.GetKeyDown(KeyCode.M))
+        if (Input.GetKeyDown(KeyCode.Alpha3))
         {
             buildMine();
         }
-        if (Input.GetKeyDown(KeyCode.L))
+        if (Input.GetKeyDown(KeyCode.Alpha4))
         {
             buildMill();
         }
-        if (Input.GetKeyDown(KeyCode.K))
+        if (Input.GetKeyDown(KeyCode.Alpha5))
         {
             buildMarket();
         }
-        
+        if (Input.GetKeyDown(KeyCode.Alpha6))
+        {
+            buildDepot();
+        }
 
     }
 }

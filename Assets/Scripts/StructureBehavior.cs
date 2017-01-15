@@ -15,7 +15,9 @@ public class StructureBehavior : MonoBehaviour {
     public float percentComplete;
     public float integrity;
 
+    public bool isActiveBuilding;
     public bool buildFlag;
+    public bool upgradeFlag;
     public bool updatedButtonFlag;
     public bool hasDestroyOrder;
 
@@ -26,13 +28,19 @@ public class StructureBehavior : MonoBehaviour {
     public GameObject closestSource; // for now, default to Castle; change this when supply depots become available.
 
     private string []structureMaterial = new string[5];
+    private int[] _units = new int[10];
+    private int[] _items = new int[5];
+
+    private float costMultiplier;
 
     //private _material[] structureMaterial = new _material[5];
     //private _unit[] occupants = new _unit[10];
     //private _item[] placedItem = new _unit[5];
 
     public float woodCost;
+    public float[] woodUpgradeCosts = new float[5];
     public float stoneCost;
+    public float[] stoneUpgradeCosts = new float[5];
     public float marketValue;
     public bool isSelected = false;
 
@@ -77,35 +85,134 @@ public class StructureBehavior : MonoBehaviour {
         homeSquare = bs;
     }
 
+    public void updateBuildingMenuPanel()
+    {
+        buildingMenuScript bms = buildMenu.GetComponent<buildingMenuScript>();
+        if (buildingType == "Tower")
+        {
+            towerScript ts = gameObject.GetComponent<towerScript>();
+            bms.updatePanelTower(this, ts);
+        }
+        else if (buildingType == "Resource")
+        {
+            resourceBuildingScript rbs = gameObject.GetComponent<resourceBuildingScript>();
+            bms.updatePanelResource(this, rbs);
+        }
+        else
+        {
+            bms.updatePanel(this);
+        }
+    }
+
     void OnMouseDown()
     {
         if (!EventSystem.current.IsPointerOverGameObject())
         {
             UpdateStructurePanel();
+            updateBuildingMenuPanel();
             homeSquare.SendMessage("updateTerrainUI");
             homeSquare.SendMessage("updateStructureUI");
-            buildingMenuScript bms = buildMenu.GetComponent<buildingMenuScript>();
-
-            if (buildingType == "Tower")
-            {
-                towerScript ts = gameObject.GetComponent<towerScript>();
-                bms.updatePanel(this, ts);
-            }
-            else if (buildingType == "Resource")
-            {
-                resourceBuildingScript rbs = gameObject.GetComponent<resourceBuildingScript>();
-                bms.updatePanel(this, rbs);
-            }
-            else 
-            {
-                bms.updatePanel(this);
-            }
-
-
         }
     }
 
-    void UpdateStructurePanel()
+     
+    public bool canBeUpgraded(gameBoard gb)
+    {
+
+        if (buildFlag || percentComplete < 100 || upgradeFlag)
+        {
+            print("Cannot upgrade incomplete building.");
+            return false;
+        }
+        else if (!isActiveBuilding)
+        {
+            print("Cannot upgrade inactive building.");
+            return false;
+        }
+        else
+        {
+            if ((gb.playerStone >= stoneCost * costMultiplier) && (gb.playerWood >= woodCost * costMultiplier))
+                return true;
+            else
+            {
+                if (gb.playerStone < stoneCost * costMultiplier)
+                {
+                    print("Insufficient STONE to upgrade." + (stoneCost * costMultiplier).ToString("0.0") + " needed.");
+                }
+                if (gb.playerWood < woodCost * costMultiplier)
+                {
+                    print("Insufficient WOOD to upgrade." + (woodCost * costMultiplier).ToString("0.0") + " needed.");
+                }
+                return false;
+            }
+        }
+    }
+
+    public void changeColor()
+    {
+        SpriteRenderer s = this.GetComponentInParent<SpriteRenderer>();
+        switch(buildingLevel)
+        {
+            case 1:
+                s.color = Color.yellow;
+                break;
+            case 2:
+                s.color = Color.green;
+                break;
+            case 3:
+                s.color = Color.cyan;
+                break;
+            case 4:
+                s.color = Color.blue;
+                break;
+            case 5:
+                s.color = Color.red;
+                break;
+            default:
+                s.color = Color.white;
+                break;
+        }
+    }
+
+    private void beginUpgrade()
+    {
+        isActiveBuilding = false;
+        buildFlag = true;
+        upgradeFlag = true;
+        percentComplete = 0.1f;
+        if (buildingType == "Tower")
+        {
+            GetComponentInParent<towerScript>().isActive = false;
+        }
+    }
+
+    private void completeUpgrade()
+    {
+        upgradeFlag = false;
+        buildingLevel++;
+        changeColor();
+        marketValue += stoneCost * costMultiplier + woodCost * costMultiplier;
+        if (buildingType == "Tower")
+        {
+            GetComponentInParent<towerScript>().isActive = true;
+            GetComponentInParent<towerScript>().updateDamageModifiers();
+        }
+        updateBuildingMenuPanel();
+    }
+
+    public void updgradeBuilding()
+    {
+        costMultiplier = Mathf.Pow((buildingLevel + 1.1f), 1.2f);
+        gameBoard cgb = GameObject.FindObjectOfType<gameBoard>();
+        if(canBeUpgraded(cgb))
+        {
+            cgb.playerStone -= stoneCost * costMultiplier;
+            cgb.playerWood -= woodCost * costMultiplier;
+            beginUpgrade();
+        }
+    }
+
+    public void UpdateStructurePanel()
     {
         GameObject temp = GameObject.Find("Health Slider");
         if (temp != null)
@@ -167,13 +274,12 @@ public class StructureBehavior : MonoBehaviour {
         percentComplete = 99;
         integrity = 99;
         buildFlag = true;
+        isActiveBuilding = false;
         workerSpeed = 25;
         buildingLevel = 0;
         barSprites = this.GetComponentsInChildren<SpriteRenderer>();
         buildMenu = GameObject.Find("BuildingMenu");
-        
-       
-
+        costMultiplier = 1;
     }
 
     void updateStructureName()
@@ -184,7 +290,7 @@ public class StructureBehavior : MonoBehaviour {
         {
             structureName = "Ruin";
         }
-        else if (buildingSubType == null || buildingSubType == "")
+        else if (buildingSubType == null || buildingSubType == "" || buildingType == "Wall")
         {
             structureName = buildingType;
         }
@@ -229,8 +335,7 @@ public class StructureBehavior : MonoBehaviour {
                     buildFlag = false;
                     if (buildingType == "Tower")
                     {
-                        towerScript ts = gameObject.GetComponent<towerScript>();
-                        ts.isActive = true;
+                        GetComponentInParent<towerScript>().isActive = true;
                     }
                         
                 }
@@ -262,14 +367,18 @@ public class StructureBehavior : MonoBehaviour {
             {
                 foreach (GameObject s in allSupply)
                 {
+                    //Debug.Log("Is in Supply: " + s.name + " distance: " + distanceToThis.ToString("0.00"));
                     if (this.transform.position != s.transform.position) //supply depots should not count themselves
                     {
-                        distanceToThis = Vector3.Distance(this.transform.position, s.transform.position);
-                        //Debug.Log("Supply: " + s.name + " distance: " + distanceToThis.ToString("0.00"));
-                        if (distanceToThis < minDistance)
+                        if (!s.GetComponent<StructureBehavior>().buildFlag) //make sure supply depot is not still being built
                         {
-                            minDistance = distanceToThis;
-                            theSource = s;
+                            distanceToThis = Vector3.Distance(this.transform.position, s.transform.position);
+                            //Debug.Log("Counts as Supply: " + s.name + " distance: " + distanceToThis.ToString("0.00"));
+                            if (distanceToThis < minDistance)
+                            {
+                                minDistance = distanceToThis;
+                                theSource = s;
+                            }
                         }
                     }
                 }
@@ -278,14 +387,14 @@ public class StructureBehavior : MonoBehaviour {
         }
     }
 
-    private void calculateSupplyLevel()
+    public void calculateSupplyLevel()
     {
         GameObject closestSource = findClosestSource();
         float distanceToThis = 0;
         if (closestSource != null)
         {
             distanceToThis = Vector3.Distance(this.transform.position, closestSource.transform.position);
-            //Debug.Log("Calculated Supply: " + closestSource.name + " distance: " + distanceToThis.ToString("0.00"));
+            //Debug.Log("Name:"+structureName+"Calculated Supply: " + closestSource.name+ " distance: " + distanceToThis.ToString("0.00"));
         }
         if (distanceToThis < 3)
             supplyLevel = 1;
@@ -296,30 +405,60 @@ public class StructureBehavior : MonoBehaviour {
 
     }
 
-    private void calculateWorkerSpeed()
+    public void calculateWorkerSpeed()
     {
         workerSpeed = (workerSpeed/homeSquare.buildTimeModifier) * supplyLevel;
         //Debug.Log("Calculated Speed: " + workerSpeed + " supply: " + supplyLevel + "terrain effect: "+ homeSquare.buildTimeModifier);
     }
 
+    public void calculateUpgradeCosts()
+    {
+        int count = 0;
+        float costMultiplier = 0;
+        foreach(float f in woodUpgradeCosts)
+        {
+            costMultiplier = Mathf.Pow((count + 1.1f), 1.2f);
+            woodUpgradeCosts[count] = costMultiplier * woodCost;
+            stoneUpgradeCosts[count] = costMultiplier * stoneCost;
+        }
+
+    }
+
+
     void Start () {
         updateStructureName();
         hasDestroyOrder = false;
         calculateSupplyLevel();
-        calculateWorkerSpeed();        
+        calculateWorkerSpeed();
+        calculateUpgradeCosts();        
     }
 
-    void refund(float percentRefund, gameBoard cgb)
+    void refund(float percentRefund)
     {
         //give player resources back
-        cgb.playerWood += percentRefund * woodCost;
-        cgb.playerStone += percentRefund * stoneCost;
+        FindObjectOfType<gameBoard>().playerWood += percentRefund * woodCost;
+        FindObjectOfType<gameBoard>().playerStone += percentRefund * stoneCost;
     }
 
-    void freeWorkers(gameBoard cgb)
+    public int unitCount()
     {
-       resourceBuildingScript buildingScript = gameObject.GetComponent<resourceBuildingScript>();
-       //cgb.playerWorkers += buildingScript.workers;
+        int count = 0;
+        foreach (int u in _units)
+        {
+            if (u > 0)
+                count++;
+        }
+        return count;
+    }
+
+    void freeUnits()
+    {
+        //resourceBuildingScript buildingScript = gameObject.GetComponent<resourceBuildingScript>();
+        int unitsToFree = unitCount();
+        if (buildingType == "Resource")
+            FindObjectOfType<gameBoard>().playerWorkers += unitsToFree;
+        else if (buildingType == "Tower")
+            FindObjectOfType<gameBoard>().playerSoldiers += unitsToFree;
     }
     
 
@@ -327,7 +466,8 @@ public class StructureBehavior : MonoBehaviour {
     {
         //print("Death");
         Destroy(gameObject);
-        gameBoard cgb = (gameBoard)FindObjectOfType(typeof(gameBoard));
+        freeUnits();
+        gameBoard cgb = FindObjectOfType<gameBoard>();
         cgb.SendMessage("popStructure", new Vector2(positionX, positionY));
         cgb.SendMessage("deleteFromPlayerStructures", gameObject);
         if (isSelected)
@@ -345,10 +485,7 @@ public class StructureBehavior : MonoBehaviour {
     // Update is called once per frame
     void Update () {
 
-        
-
-
-        if(isSelected && !updatedButtonFlag)
+        if (isSelected && !updatedButtonFlag)
         {
             updateButtons();
             updatedButtonFlag = true;
@@ -360,15 +497,22 @@ public class StructureBehavior : MonoBehaviour {
 
         if (percentComplete < 100 && buildFlag)
         {
-            percentComplete += Time.deltaTime * workerSpeed;
+            percentComplete += (Time.deltaTime * workerSpeed)/(buildingLevel+1);
             if (percentComplete >= 100)
             {
                 percentComplete = 100;
+                buildFlag = false;
+                isActiveBuilding = true;
+                if (upgradeFlag)
+                    completeUpgrade();
+
                 if (buildingType == "Tower")
                 {
-                    //print("TOWER COMPLETE -- ACTIVATING");
-                    towerScript ts = gameObject.GetComponent<towerScript>();
-                    ts.isActive = true;
+                    GetComponentInParent<towerScript>().isActive = true;
+                }
+                else if(buildingSubType == "Depot")
+                {
+                    FindObjectOfType<gameBoard>().recalculateSupply();
                 }
             }
 
@@ -383,20 +527,16 @@ public class StructureBehavior : MonoBehaviour {
 
         if (Input.GetKeyDown(KeyCode.Backspace) && isSelected)
         {
-            gameBoard cgb = (gameBoard)FindObjectOfType(typeof(gameBoard));
-            if (buildingType != "Castle" && cgb!=null)
+            //gameBoard cgb = (gameBoard)FindObjectOfType(typeof(gameBoard));
+            if (buildingType != "Castle")
             {
                 float refundPercentage = 1.00f;
                 if (!buildFlag)
                     refundPercentage = .50f;                
-                refund(refundPercentage, cgb);
+                refund(refundPercentage);
                 if(buildingType == "Resource")
-                    freeWorkers(cgb);
+                    freeUnits();
                 destroyThis();
-            }
-            else if (cgb == null)
-            {
-                Debug.Log("No CGB in StructureBehavior");
             }
             else
             {

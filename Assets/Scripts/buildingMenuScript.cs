@@ -11,6 +11,11 @@ public class buildingMenuScript : MonoBehaviour
     public Sprite []buildingImages;
     private Image currentImage;
 
+    public Text buildingTitle;
+    public Text leftSideDetails;
+    public Text rightSideDetails;
+
+
     // Use this for initialization
     void Awake()
     {
@@ -70,16 +75,20 @@ public class buildingMenuScript : MonoBehaviour
 
     private void updateBasicInfo(StructureBehavior sb)
     {
-
+        buildingTitle.text = sb.structureName;
+        leftSideDetails.text = "Level: " + sb.buildingLevel + "\nSupply: " + sb.supplyLevel.ToString("0.00");
     }
 
     private void updateTowerInfo(towerScript ts)
     {
-
+        ammoScript ammoS = ts.towerAmmo.GetComponent<ammoScript>();
+        float rofProx = 1 / ts.rateOfFire;
+        float dps = (ammoS.damageLower*ts.damageModifierLower + ammoS.damageUpper*ts.damageModifierUpper) *rofProx;
+        rightSideDetails.text = "Range: " + ts.attackRange + "\nRate of Fire: " + rofProx.ToString("0.00")+"\nAmmo Type: " +ammoS.damageType + "\nDamage: " + (ammoS.damageUpper*ts.damageModifierUpper).ToString("0.0")+"\nDPS:"+ dps.ToString("0.00");
     }
 
 
-    public void updatePanel(StructureBehavior sb, towerScript ts)
+    public void updatePanelTower(StructureBehavior sb, towerScript ts)
     {
         updatePanelImage(sb.buildingType, sb.buildingSubType);
         updateBasicInfo(sb);
@@ -87,18 +96,26 @@ public class buildingMenuScript : MonoBehaviour
             updateTowerInfo(ts);
     }
 
-    public void updatePanel(StructureBehavior sb, resourceBuildingScript rbs)
+    public void updateResourceBuildingInfo(resourceBuildingScript rbs)
+    {
+        print("RBS2");
+        rightSideDetails.text = "Resource: " + rbs.resourceType + " Production: " + rbs.currentProduction().ToString("0.00");
+    }
+
+    public void updatePanelResource(StructureBehavior sb, resourceBuildingScript rbs)
     {
         updatePanelImage(sb.buildingType, sb.buildingSubType);
         updateBasicInfo(sb);
-        //if (rbs != null)
-            //updateResourceBuildingInfo(rbs);
+        print("RBS");
+        if (rbs != null)
+            updateResourceBuildingInfo(rbs);
     }
 
     public void updatePanel(StructureBehavior sb)
     {
         updatePanelImage(sb.buildingType, sb.buildingSubType);
         updateBasicInfo(sb);
+        rightSideDetails.text = "";
     }
 }
 
