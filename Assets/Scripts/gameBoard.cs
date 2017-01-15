@@ -11,12 +11,15 @@ public class gameBoard : MonoBehaviour
     public static bool isPaused = false;
 
     public int startingEnemies;
+    public int startingRuins;
+
     public int difficultySetting;
     public string playerRace;
     public int playerLevel;
     public int playerBuildSpeed;
     public int playerWorkers;
     public int playerSoldiers;
+
 
     public node[,] pathGrid;
     
@@ -235,6 +238,51 @@ public class gameBoard : MonoBehaviour
         //Debug.Log(home);
     }
 
+    void generateRuins()
+    {
+        Vector3 xyPosition = new Vector3();
+        //string[] ruinMaterial = { "Marble", "Granite", "Obsidian", "Limestone", "Basalt", "Brownstone", "Flagstone", "Quadratum" };
+        string[] ruinType = { "HellGate", "MuckHole"};
+        GameObject tempHandle;
+        StructureBehavior sb;
+        GameObject bt;
+        BoardSquare thisSquare;
+        generatorScript gs;
+
+        for (int icount = 0; icount < startingRuins; icount++)
+        {
+            
+            xyPosition.x = startingPositionX + (4 * (icount + 1));
+            xyPosition.y = startingPositionY + (4 * (icount + 1));
+            tempHandle = Instantiate(ruinsPrototype, xyPosition, Quaternion.identity) as GameObject;
+            sb = tempHandle.GetComponent<StructureBehavior>();
+            sb.updateMaterialType("Basalt", 0);
+            sb.buildingType = "Ruin";
+            sb.buildingSubType = ruinType[0];
+            sb.marketValue = 0;
+            sb.percentComplete = 100;
+            sb.integrity = 100;
+            sb.buildFlag = false;
+            sb.workerSpeed = 99f;
+            sb.positionX = Mathf.RoundToInt(xyPosition.x) - 1;
+            sb.positionY = Mathf.RoundToInt(xyPosition.y) - 1;
+            bt = boardTile[sb.positionX, sb.positionY];
+            thisSquare = bt.GetComponent<BoardSquare>();
+            if (thisSquare.structure == null)
+            {
+                thisSquare.structure = tempHandle;
+            }
+            sb.homeSquare = thisSquare;
+
+            gs = tempHandle.GetComponent<generatorScript>();
+            if (icount==0)
+                gs.isActive = true;
+            else
+                gs.isActive = false;
+
+        }
+    }
+
 
     string findTileType(int i)
     {
@@ -363,8 +411,7 @@ public class gameBoard : MonoBehaviour
         selector = Instantiate(selectorAnimation, new Vector3(startingPositionX+1, startingPositionY+1, 0), Quaternion.identity) as GameObject;
 
 
-        //int currentRnd;
-        //string[] ruinMaterial = { "Marble", "Granite", "Obsidian", "Limestone", "Basalt", "Brownstone", "Flagstone", "Quadratum" };
+        
 
         boardTile = new GameObject[tileSizeX, tileSizeY];
         pathGrid = new node[tileSizeX, tileSizeY];
@@ -399,18 +446,9 @@ public class gameBoard : MonoBehaviour
                 bs.buildTimeModifier = bt.buildTimeMultiplier;
 
                 srSquare.sprite = srTerrain.sprite;
-               
 
-                /*
-                currentRnd = Mathf.CeilToInt(Random.value * 100 + .49f);
-                if (currentRnd < 3)
-                {
-                    GameObject tempObject = Instantiate(ruinsPrototype, new Vector3(i + 1, j + 1, 0), Quaternion.identity) as GameObject;
-                    bs.foundation = tempObject;
-                    currentRnd = Mathf.CeilToInt(Random.value * ruinMaterial.Length);                    
-                    tempObject.SendMessage("RuinStart", ruinMaterial[currentRnd - 1]);
-                }
-                */
+
+                
             }
     }
 
@@ -866,6 +904,7 @@ public class gameBoard : MonoBehaviour
         playerRaceText.text = playerRace;
         initializeGameBoard();
         createCastle();
+        generateRuins();
         initializeGUI();
         getWalkableSquares();
         spawnEnemies();

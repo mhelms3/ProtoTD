@@ -30,22 +30,28 @@ public class generatorScript : MonoBehaviour {
 
     void generateEnemy(int type)
     {
-        //float newPosx = positionX + (Random.value * 1) - .5f;
-        //float newPosy = positionY + (Random.value * 1) - .5f;
+        float newPosx = positionX + (Random.value * 1.5f) - .5f;
+        float newPosy = positionY + (Random.value * 1.5f) - .5f;
         //GameObject e = Instantiate(enemy[type], new Vector3(newPosx, newPosy, 1), Quaternion.identity) as GameObject;
 
-        GameObject e = Instantiate(enemy[type], new Vector3(positionX, positionY, 1), Quaternion.identity) as GameObject;        
+        print("Enemy@ X:"+positionX + " Y:" + positionY);
+        GameObject e = Instantiate(enemy[type], new Vector3(newPosx, newPosy, 1), Quaternion.identity) as GameObject;        
         cgb.SendMessage("addEnemyToBoard", e);
     }
 
+
+    void Awake ()
+    {
+        isActive = false;
+    }
+
 	void Start () {        
-        StructureBehavior bs = GetComponent<StructureBehavior>();
-        cgb = (gameBoard)FindObjectOfType(typeof(gameBoard));
+        StructureBehavior bs = GetComponentInParent<StructureBehavior>();
+        cgb = FindObjectOfType<gameBoard>();
         enemy = cgb.enemyType;
         positionX = bs.positionX;
         positionY = bs.positionY;
         pauseCounter = 0;
-        isActive = cgb.activeEnemies;
 }
 	
 	// Update is called once per frame
@@ -75,8 +81,7 @@ public class generatorScript : MonoBehaviour {
                 if (pauseCounter > enemyPause)
                 {
                     pauseCounter = 0;
-                    //rndEnemy = Mathf.FloorToInt(Random.value * 4);
-                    rndEnemy = 0;
+                    rndEnemy = Mathf.FloorToInt(Random.value * enemy.Length);
                     generateEnemy(rndEnemy);
                     numberRemaining -= 1;
                     if (numberRemaining < 1)

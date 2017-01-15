@@ -11,6 +11,7 @@ public class StructureBehavior : MonoBehaviour {
     public float workerSpeed;
     public int buildingLevel;
     public float supplyLevel;
+    public float costRamp;
 
     public float percentComplete;
     public float integrity;
@@ -27,9 +28,9 @@ public class StructureBehavior : MonoBehaviour {
     public BoardSquare homeSquare;
     public GameObject closestSource; // for now, default to Castle; change this when supply depots become available.
 
-    private string []structureMaterial = new string[5];
+    public string []structureMaterial = new string[5];
     private int[] _units = new int[10];
-    private int[] _items = new int[5];
+    //private int[] _items = new int[5];
 
     private float costMultiplier;
 
@@ -280,6 +281,7 @@ public class StructureBehavior : MonoBehaviour {
         barSprites = this.GetComponentsInChildren<SpriteRenderer>();
         buildMenu = GameObject.Find("BuildingMenu");
         costMultiplier = 1;
+        costRamp = 1.2f;
     }
 
     void updateStructureName()
@@ -311,9 +313,9 @@ public class StructureBehavior : MonoBehaviour {
     void updateStatusBars()
     {
         foreach (SpriteRenderer c in barSprites)
-        {
+        {      
             if (c.name == "HealthBar")
-            {
+            {      
                 if (integrity > 99.9)
                     c.enabled = false;
                 else
@@ -337,7 +339,6 @@ public class StructureBehavior : MonoBehaviour {
                     {
                         GetComponentInParent<towerScript>().isActive = true;
                     }
-                        
                 }
                 else
                 {
@@ -407,30 +408,39 @@ public class StructureBehavior : MonoBehaviour {
 
     public void calculateWorkerSpeed()
     {
-        workerSpeed = (workerSpeed/homeSquare.buildTimeModifier) * supplyLevel;
+        if(buildingType!="Ruin")
+            workerSpeed = (workerSpeed/homeSquare.buildTimeModifier) * supplyLevel;
         //Debug.Log("Calculated Speed: " + workerSpeed + " supply: " + supplyLevel + "terrain effect: "+ homeSquare.buildTimeModifier);
     }
 
     public void calculateUpgradeCosts()
     {
-        int count = 0;
-        float costMultiplier = 0;
-        foreach(float f in woodUpgradeCosts)
-        {
-            costMultiplier = Mathf.Pow((count + 1.1f), 1.2f);
-            woodUpgradeCosts[count] = costMultiplier * woodCost;
-            stoneUpgradeCosts[count] = costMultiplier * stoneCost;
-        }
-
+        float cm = 0;
+        if (buildingType != "Ruin")
+            for (int count = 0; count<woodUpgradeCosts.Length; count++)
+            {
+                cm = Mathf.Pow((count + 1.1f), costRamp);
+                woodUpgradeCosts[count] = cm * woodCost;
+                stoneUpgradeCosts[count] = cm * stoneCost;
+            }
     }
 
 
     void Start () {
         updateStructureName();
         hasDestroyOrder = false;
-        calculateSupplyLevel();
-        calculateWorkerSpeed();
-        calculateUpgradeCosts();        
+        if (buildingType != "Ruin")
+        {
+            calculateSupplyLevel();
+            calculateWorkerSpeed();
+            calculateUpgradeCosts();
+        }
+        else if(buildingType == "Ruin")
+        {
+            integrity = 100;
+            percentComplete = 100;
+            updateStatusBars();
+        }
     }
 
     void refund(float percentRefund)
@@ -466,14 +476,17 @@ public class StructureBehavior : MonoBehaviour {
     {
         //print("Death");
         Destroy(gameObject);
-        freeUnits();
         gameBoard cgb = FindObjectOfType<gameBoard>();
         cgb.SendMessage("popStructure", new Vector2(positionX, positionY));
-        cgb.SendMessage("deleteFromPlayerStructures", gameObject);
-        if (isSelected)
-            cgb.SendMessage("openMenu", "Build");
-        cgb.SendMessage("setWalkableCheck");
-        cgb.SendMessage("setEnemyCheck");
+        if (buildingType != "Ruin")
+        {
+            freeUnits();
+            cgb.SendMessage("deleteFromPlayerStructures", gameObject);
+            if (isSelected)
+                cgb.SendMessage("openMenu", "Build");
+            cgb.SendMessage("setWalkableCheck");
+            cgb.SendMessage("setEnemyCheck");
+        }
         //Debug.Log("Destroying " + buildingType + " at [" + positionX + "," + positionY + "]");
     }
    
@@ -485,64 +498,67 @@ public class StructureBehavior : MonoBehaviour {
     // Update is called once per frame
     void Update () {
 
-        if (isSelected && !updatedButtonFlag)
+        if (buildingType != "Ruin")
         {
-            updateButtons();
-            updatedButtonFlag = true;
-        }
-        else if(!isSelected && updatedButtonFlag)
-        {
-            updatedButtonFlag = false;
-        }
-
-        if (percentComplete < 100 && buildFlag)
-        {
-            percentComplete += (Time.deltaTime * workerSpeed)/(buildingLevel+1);
-            if (percentComplete >= 100)
+            if (isSelected && !updatedButtonFlag)
             {
-                percentComplete = 100;
-                buildFlag = false;
-                isActiveBuilding = true;
-                if (upgradeFlag)
-                    completeUpgrade();
+                updateButtons();
+                updatedButtonFlag = true;
+            }
+            else if (!isSelected && updatedButtonFlag)
+            {
+                updatedButtonFlag = false;
+            }
 
-                if (buildingType == "Tower")
+            if (percentComplete < 100 && buildFlag)
+            {
+                percentComplete += (Time.deltaTime * workerSpeed) / (buildingLevel + 1);
+                if (percentComplete >= 100)
                 {
-                    GetComponentInParent<towerScript>().isActive = true;
+                    percentComplete = 100;
+                    buildFlag = false;
+                    isActiveBuilding = true;
+                    if (upgradeFlag)
+                        completeUpgrade();
+
+                    if (buildingType == "Tower")
+                    {
+                        GetComponentInParent<towerScript>().isActive = true;
+                    }
+                    else if (buildingSubType == "Depot")
+                    {
+                        FindObjectOfType<gameBoard>().recalculateSupply();
+                    }
                 }
-                else if(buildingSubType == "Depot")
+
+                integrity += Time.deltaTime * workerSpeed;
+                if (integrity > percentComplete)
+                    integrity = percentComplete;
+
+                updateStatusBars();
+                if (isSelected)
+                    UpdateStructurePanel();
+            }
+
+            if (Input.GetKeyDown(KeyCode.Backspace) && isSelected)
+            {
+                //gameBoard cgb = (gameBoard)FindObjectOfType(typeof(gameBoard));
+                if (buildingType != "Castle")
                 {
-                    FindObjectOfType<gameBoard>().recalculateSupply();
+                    float refundPercentage = 1.00f;
+                    if (!buildFlag)
+                        refundPercentage = .50f;
+                    refund(refundPercentage);
+                    if (buildingType == "Resource")
+                        freeUnits();
+                    destroyThis();
                 }
+                else if (buildingType != "Castle")
+                {
+                    Debug.Log("DONT DESTROY YOUR OWN CASTLE!!!");
+                }
+
             }
-
-            integrity += Time.deltaTime * workerSpeed;
-            if (integrity > percentComplete)
-                integrity = percentComplete;
-
-            updateStatusBars();
-            if(isSelected)
-                UpdateStructurePanel();
-        }
-
-        if (Input.GetKeyDown(KeyCode.Backspace) && isSelected)
-        {
-            //gameBoard cgb = (gameBoard)FindObjectOfType(typeof(gameBoard));
-            if (buildingType != "Castle")
-            {
-                float refundPercentage = 1.00f;
-                if (!buildFlag)
-                    refundPercentage = .50f;                
-                refund(refundPercentage);
-                if(buildingType == "Resource")
-                    freeUnits();
-                destroyThis();
-            }
-            else
-            {
-                Debug.Log("DONT DESTROY YOUR OWN CASTLE!!!");
-            }
-
         }
 
         if (integrity<0)
