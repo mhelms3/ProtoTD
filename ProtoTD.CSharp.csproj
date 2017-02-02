@@ -71,6 +71,7 @@
     <Compile Include="Assets\Scripts\RightClick.cs" />
     <Compile Include="Assets\Scripts\StructureBehavior.cs" />
     <Compile Include="Assets\Scripts\ammoScript.cs" />
+    <Compile Include="Assets\Scripts\buildingMenuScript.cs" />
     <Compile Include="Assets\Scripts\buttonBehaviorScript.cs" />
     <Compile Include="Assets\Scripts\cameraBehavior.cs" />
     <Compile Include="Assets\Scripts\castleScript.cs" />
@@ -80,9 +81,10 @@
     <Compile Include="Assets\Scripts\generatorScript.cs" />
     <Compile Include="Assets\Scripts\node.cs" />
     <Compile Include="Assets\Scripts\pathFindingScript.cs" />
+    <Compile Include="Assets\Scripts\popUpScript.cs" />
     <Compile Include="Assets\Scripts\resourceBuildingScript.cs" />
     <Compile Include="Assets\Scripts\towerScript.cs" />
-    <Compile Include="Assets\Scripts\buildingMenuScript.cs" />
+    <Compile Include="Assets\Scripts\numberPop.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\SyntaxTree\UnityVS\2015\UnityVS.CSharp.targets" />
 </Project>

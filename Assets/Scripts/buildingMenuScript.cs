@@ -83,8 +83,8 @@ public class buildingMenuScript : MonoBehaviour
     {
         ammoScript ammoS = ts.towerAmmo.GetComponent<ammoScript>();
         float rofProx = 1 / ts.rateOfFire;
-        float dps = (ammoS.damageLower*ts.damageModifierLower + ammoS.damageUpper*ts.damageModifierUpper) *rofProx;
-        rightSideDetails.text = "Range: " + ts.attackRange + "\nRate of Fire: " + rofProx.ToString("0.00")+"\nAmmo Type: " +ammoS.damageType + "\nDamage: " + (ammoS.damageUpper*ts.damageModifierUpper).ToString("0.0")+"\nDPS:"+ dps.ToString("0.00");
+        float dps = (ammoS.damageLower*(1+ts.damageModifierLower) + ammoS.damageUpper*(1+ts.damageModifierUpper)) *rofProx;
+        rightSideDetails.text = "Range: " + ts.attackRange + "\nRate of Fire: " + rofProx.ToString("0.00")+"\nAmmo Type: " +ammoS.damageType + "\nDamage: " + (ammoS.damageUpper*(1+ts.damageModifierUpper)).ToString("0.0")+"\nDPS:"+ dps.ToString("0.00");
     }
 
 
@@ -98,7 +98,7 @@ public class buildingMenuScript : MonoBehaviour
 
     public void updateResourceBuildingInfo(resourceBuildingScript rbs)
     {
-        print("RBS2");
+        //print("RBS2");
         rightSideDetails.text = "Resource: " + rbs.resourceType + " Production: " + rbs.currentProduction().ToString("0.00");
     }
 
@@ -106,7 +106,7 @@ public class buildingMenuScript : MonoBehaviour
     {
         updatePanelImage(sb.buildingType, sb.buildingSubType);
         updateBasicInfo(sb);
-        print("RBS");
+        //print("RBS");
         if (rbs != null)
             updateResourceBuildingInfo(rbs);
     }

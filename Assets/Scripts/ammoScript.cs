@@ -6,7 +6,7 @@ public class ammoScript : MonoBehaviour
 
 
     public float speed = 5;
-    public float maxDistance = 5.6f;
+    private float maxDistance = 5.6f;
     public float distanceTraveled;
     public float damageLower = 2;
     public float damageUpper = 7;
@@ -31,12 +31,15 @@ public class ammoScript : MonoBehaviour
         ParticleSystemRenderer psr = gameObject.GetComponentInChildren<ParticleSystemRenderer>();
         if(psr!=null)
             psr.sortingLayerName = "Ammo";
-        
+    }
 
+    public void updateMaxDistance(float towerRange)
+    {
+        maxDistance = towerRange * 1.25f;
     }
 
 
-
+    
     void OnTriggerEnter2D(Collider2D col)
     {
         if (col.gameObject.tag == "Enemy" && !isEnemyAttack)
@@ -48,7 +51,7 @@ public class ammoScript : MonoBehaviour
         }
         else if (col.gameObject.tag == "Building" || col.gameObject.tag == "Tower")
         {
-            print("Hit a Building");
+            print("Hit a:" + col.gameObject.tag);
             //enemyBehavior enemyInfo = col.gameObject.GetComponent<enemyBehavior>();
             //float damage = Mathf.Round(Random.value * (damageUpper - damageLower) + damageLower);
             //enemyInfo.hitPoints -= damage;
@@ -71,9 +74,9 @@ public class ammoScript : MonoBehaviour
         Vector3 position = transform.position;
         foreach (GameObject go in targetObjects)
         {
-            //print("---checking target "+ go.name +" at " + go.transform.position);
+            print("---checking target "+ go.name +" at " + go.transform.position);
             float curDistance = getDistance(go.transform.position, position);
-            //print("---checking target " + go.name + " at " + go.transform.position + " distance:" + curDistance);
+            print("---checking target " + go.name + " at " + go.transform.position + " distance:" + curDistance);
             if (curDistance < distance)
             {
                 closest = go;
@@ -110,8 +113,8 @@ public class ammoScript : MonoBehaviour
 
     void moveAmmo(float s)
     {
-        if(attackTarget != null)
-            attackPosition = attackTarget.transform.position + new Vector3(0.5f, -0.5f);
+        if (attackTarget != null)
+            attackPosition = attackTarget.transform.position + new Vector3(0.25f, -0.25f);
 
         transform.position = Vector3.MoveTowards(transform.position, attackPosition, s);
         rotateToTarget(attackPosition);
@@ -131,11 +134,16 @@ public class ammoScript : MonoBehaviour
             distanceTraveled += step;
         }
 
+        if(attackPosition.x <= 0 || attackPosition.y <=0)
+        {
+            print("odd attack position x:" + attackPosition.x + " y:" + attackPosition.y);
+            Destroy(gameObject);
+        }
 
-        if (distanceTraveled > maxDistance || hasTarget == false || getDistance(attackPosition, transform.position) < .00001)
+        if ( (distanceTraveled > maxDistance) || (hasTarget == false) || (getDistance(attackPosition, transform.position) < .00001))
         {
             Destroy(gameObject);
-            //print("distance destroy");
+            //print("distance destroy.." + maxDistance +" to:" + distanceTraveled);
         }
         
 

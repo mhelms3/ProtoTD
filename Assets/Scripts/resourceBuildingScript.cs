@@ -52,13 +52,16 @@ public class resourceBuildingScript : MonoBehaviour {
         int count = 0;
         int xCoord = home.positionX;
         int yCoord = home.positionY;
+        int checkCoordX, checkCoordY;
 
         for(int kfor = -i; kfor<i+1; kfor++)
             for (int jfor = -i; jfor<i+1; jfor++)
             {
                 if ((kfor != 0) || (jfor != 0))
-                { 
-                    neighbors[count] = cgb.boardTile[xCoord + kfor, yCoord + jfor].GetComponent<BoardSquare>();
+                {
+                    checkCoordX = Mathf.Clamp(xCoord + kfor, 0, gameBoard.tileSizeX);
+                    checkCoordY = Mathf.Clamp(xCoord + kfor, 0, gameBoard.tileSizeY);
+                    neighbors[count] = cgb.boardTile[checkCoordX, checkCoordY].GetComponent<BoardSquare>();
                     count++;
                 }
             }

@@ -27,9 +27,10 @@ public class StructureBehavior : MonoBehaviour {
     public string buildingSubType;
     public BoardSquare homeSquare;
     public GameObject closestSource; // for now, default to Castle; change this when supply depots become available.
+    public GameObject popUp;
 
-    public string []structureMaterial = new string[5];
-    private int[] _units = new int[10];
+    private string[] structureMaterial;
+    private int[] _units = new int[10] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
     //private int[] _items = new int[5];
 
     private float costMultiplier;
@@ -59,13 +60,15 @@ public class StructureBehavior : MonoBehaviour {
     
     void OnTriggerEnter2D(Collider2D col)
     {
-        //print("Hit building");
-        if (col.gameObject.tag == "EnemyAmmo")
+        if (col.gameObject.tag == "EnemyAmmo" && gameObject.tag != "Generator")
         {
             ammoScript aScript = col.gameObject.GetComponent<ammoScript>();
-            float damage = Mathf.Round(Random.value * (aScript.damageUpper - aScript.damageLower) + aScript.damageLower);
+            float damage = Mathf.Round(UnityEngine.Random.value * (aScript.damageUpper - aScript.damageLower) + aScript.damageLower);
+            GameObject dText = Instantiate(popUp, transform.position, Quaternion.identity) as GameObject;
+            dText.GetComponent<numberPop>().updateText(damage.ToString("0"));
+            dText.GetComponent<numberPop>().updateColor(Color.red);
+            dText.GetComponent<numberPop>().setTextPos(transform.position);
             integrity -= damage;
-            //print("Building hit for " + damage + " damage");
             updateStatusBars();
             Destroy(col.gameObject);
         }
@@ -91,12 +94,24 @@ public class StructureBehavior : MonoBehaviour {
         buildingMenuScript bms = buildMenu.GetComponent<buildingMenuScript>();
         if (buildingType == "Tower")
         {
+            print("Tower:" + structureName);
             towerScript ts = gameObject.GetComponent<towerScript>();
+            if(ts==null)
+            {
+                print("null towerscript error");
+                bms.updatePanel(this);
+            }
             bms.updatePanelTower(this, ts);
         }
         else if (buildingType == "Resource")
         {
+            print("Resource:" + structureName);
             resourceBuildingScript rbs = gameObject.GetComponent<resourceBuildingScript>();
+            if (rbs == null)
+            {
+                print("null resourceScript error");
+                bms.updatePanel(this);
+            }
             bms.updatePanelResource(this, rbs);
         }
         else
@@ -120,7 +135,7 @@ public class StructureBehavior : MonoBehaviour {
     public bool canBeUpgraded(gameBoard gb)
     {
 
-        if (buildFlag || percentComplete < 100 || upgradeFlag)
+        if (buildFlag || percentComplete < 100 || upgradeFlag || buildingLevel>4)
         {
             print("Cannot upgrade incomplete building.");
             return false;
@@ -241,20 +256,22 @@ public class StructureBehavior : MonoBehaviour {
         }
 
         temp = GameObject.Find("Materials Label");
+        string tempString = "";
         if (temp != null)
         {
             aText = temp.GetComponent<Text>();
             int count = 0;
             foreach (string s in structureMaterial)
             {
-                if (s != null)
+                if (s != null && s!= "")
                 {
-                    aText.text = "Level "+count+ " Material: " + s +"\n";
+                    tempString = tempString + "Level "+count+ " Material: " + s +"\n";
                     count++;
                 }
                 else
                     break;
-            }            
+            }
+            aText.text = tempString;
         }
 
         temp = GameObject.Find("Special Properties");
@@ -282,6 +299,18 @@ public class StructureBehavior : MonoBehaviour {
         buildMenu = GameObject.Find("BuildingMenu");
         costMultiplier = 1;
         costRamp = 1.2f;
+
+        //int inc = 0;
+        structureMaterial = new string[5];
+        for (int i=0; i<5; i++)
+            structureMaterial[i] = "";
+        /*
+         foreach (string s in structureMaterial)
+         {
+
+             inc++;
+         }
+         */
     }
 
     void updateStructureName()
@@ -307,7 +336,7 @@ public class StructureBehavior : MonoBehaviour {
         structureMaterial[materialLevel] = s;
         updateStructureName();
     }
-    // Update is called once per frame
+   
 
 
     void updateStatusBars()
@@ -404,6 +433,8 @@ public class StructureBehavior : MonoBehaviour {
         else
             supplyLevel = .05f;
 
+        calculateWorkerSpeed();
+
     }
 
     public void calculateWorkerSpeed()
@@ -432,7 +463,6 @@ public class StructureBehavior : MonoBehaviour {
         if (buildingType != "Ruin")
         {
             calculateSupplyLevel();
-            calculateWorkerSpeed();
             calculateUpgradeCosts();
         }
         else if(buildingType == "Ruin")
@@ -537,7 +567,10 @@ public class StructureBehavior : MonoBehaviour {
 
                 updateStatusBars();
                 if (isSelected)
+                {
                     UpdateStructurePanel();
+                    updateBuildingMenuPanel();
+                }
             }
 
             if (Input.GetKeyDown(KeyCode.Backspace) && isSelected)

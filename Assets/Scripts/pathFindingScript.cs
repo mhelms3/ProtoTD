@@ -188,8 +188,8 @@ public class pathFindingScript : MonoBehaviour {
 	void Start () {
         
         gameBoard cgb = (gameBoard)FindObjectOfType(typeof(gameBoard));
-        dimX = cgb.tileSizeX;
-        dimY = cgb.tileSizeY;
+        dimX = gameBoard.tileSizeX;
+        dimY = gameBoard.tileSizeY;
         boardGrid = cgb.pathGrid;
         sw = new Stopwatch();
         /*

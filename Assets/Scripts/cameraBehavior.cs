@@ -24,8 +24,8 @@ public class cameraBehavior : MonoBehaviour {
     void Start () {
         gb = (gameBoard)FindObjectOfType(typeof(gameBoard));
         home = gb.home;
-        tileSizeX = gb.tileSizeX;
-        tileSizeY = gb.tileSizeY;        
+        tileSizeX = gameBoard.tileSizeX;
+        tileSizeY = gameBoard.tileSizeY;        
         camera1.orthographicSize = cameraDistance;
         camera1.transform.position = home;
         adjustCamera();

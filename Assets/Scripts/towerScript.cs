@@ -3,7 +3,7 @@ using UnityEngine.EventSystems;
 using System.Collections;
 
 public class towerScript : MonoBehaviour {
-    public int towerType;
+    public string towerType;
     public bool isActive;
 
     public float rateOfFire;
@@ -17,33 +17,76 @@ public class towerScript : MonoBehaviour {
     public GameObject attackTarget;
     public StructureBehavior sb;
     public string targetType = "Enemy";
+    public string targetSubType;
 
     public void makeActive()
     {
         isActive = true;
     }
 
-    public void findTarget()
+    GameObject findClosestTarget(GameObject[] targetList)
     {
-        GameObject[] targetObjects = GameObject.FindGameObjectsWithTag(targetType);
         GameObject closest = null;
         float distance = Mathf.Infinity;
         Vector3 position = transform.position;
-        foreach (GameObject go in targetObjects)
+        foreach (GameObject go in targetList)
         {
-           //print("---checking target "+ go.name +" at " + go.transform.position);
             float curDistance = getDistance(go.transform.position, position);
-           //print("---checking target " + go.name + " at " + go.transform.position + " distance:" + curDistance);
             if (curDistance < distance)
             {
                 closest = go;
                 distance = curDistance;
             }
         }
-        if (closest != null)
+        if (closest != null && distance<attackRange)
         {
-            attackTarget = closest;
-            //print("---attack target " + closest.name + " at " + closest.transform.position + " distance:" + distance);
+            return (closest);
+        }
+        else
+        {
+            return (null);
+        }
+    }
+
+    public void findTarget()
+    {
+        GameObject[] targetObjects = GameObject.FindGameObjectsWithTag(targetType);
+        if (targetObjects.Length > 0)
+        {
+            GameObject[] tempObjects = new GameObject[targetObjects.Length];
+            int indexSubType = 0;
+
+            foreach (GameObject go in targetObjects)
+            {
+                enemyBehavior eb = go.GetComponent<enemyBehavior>();
+                if (eb.enemySubType == targetSubType)
+                {
+                    tempObjects[indexSubType] = go;
+                    indexSubType++;
+                }
+            }
+
+            if (indexSubType > 0)
+            {
+                GameObject[] subTypeObjects = new GameObject[indexSubType];
+                int counter = 0;
+                foreach (GameObject go2 in subTypeObjects)
+                {
+                    subTypeObjects[counter] = tempObjects[counter];
+                    counter++;
+                }
+                attackTarget = findClosestTarget(subTypeObjects);
+            }
+
+            if (attackTarget == null)
+            {
+                attackTarget = findClosestTarget(targetObjects);
+            }
+
+        }
+        else
+        {
+            attackTarget = null;
         }
    }
 
@@ -74,6 +117,7 @@ public class towerScript : MonoBehaviour {
             Vector3 startingPos = new Vector3(transform.position.x +.25f, transform.position.y - .5f, transform.position.z);
             GameObject ammo = Instantiate(towerAmmo, startingPos, Quaternion.identity) as GameObject;
             ammoScript aScript = ammo.GetComponent<ammoScript>();
+            aScript.updateMaxDistance(attackRange);
             aScript.attackTarget = attackTarget;
             modifyDamage(aScript);
             attackTimer = 0;
@@ -97,22 +141,21 @@ public class towerScript : MonoBehaviour {
 
     // Update is called once per frame
     void Update () {
-	
-        if(attackTarget == null)
+        if (isActive && gameBoard.hasEnemies)
         {
-            findTarget();
+            if (attackTimer < rateOfFire)
+            {
+                attackTimer += Time.deltaTime;
+            }
+            else if (attackTimer >= rateOfFire && attackTarget == null)
+            {
+                findTarget();
+            }
+            if (attackTimer > rateOfFire && attackTarget != null)
+            {
+                shootAmmo();
+            }
         }
-
-        if (attackTimer < rateOfFire && isActive)
-        {
-            attackTimer += Time.deltaTime;
-        }
-        
-        if(attackTimer > rateOfFire && attackTarget != null && isActive)
-        {
-            shootAmmo();
-        }
-
-
     }
+
 }

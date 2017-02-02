@@ -9,6 +9,7 @@ public class gameBoard : MonoBehaviour
     /// add character spells, lay lines, places of power (place wizard towers near to recharge mana)
     /// </summary>
     public static bool isPaused = false;
+    public static bool hasEnemies = false;
 
     public int startingEnemies;
     public int startingRuins;
@@ -64,8 +65,8 @@ public class gameBoard : MonoBehaviour
     public Text playerRaceText;
     public Text playerLevelText;
 
-    public int tileSizeX;
-    public int tileSizeY;
+    public static int tileSizeX = 50;
+    public static int tileSizeY = 50;
     public int startingPositionX;
     public int startingPositionY;
 
@@ -86,6 +87,7 @@ public class gameBoard : MonoBehaviour
 
     public GameObject foundationPrototype;
     public GameObject ruinsPrototype;
+    public GameObject[] generators;
 
     public GameObject playerCastle;
     public Vector3 home; //keep
@@ -221,8 +223,9 @@ public class gameBoard : MonoBehaviour
         GameObject tempObject = Instantiate(playerCastle, startingPosition, Quaternion.identity) as GameObject;
         StructureBehavior sb = (StructureBehavior)tempObject.GetComponent(typeof(StructureBehavior));
         //sb.foundationMaterial = "Granite";
-        sb.updateMaterialType("Granite", 0);
         sb.marketValue = 1000;
+        sb.updateMaterialType("Granite", 0);
+        
         assignStructure(Mathf.RoundToInt(startingPositionX-1), Mathf.RoundToInt(startingPositionY-1), tempObject, true);        
         home = new Vector3(startingPositionX, startingPositionY, -1);
         selectedTile = new Vector2(startingPositionX-1, startingPositionY-1);
@@ -238,27 +241,56 @@ public class gameBoard : MonoBehaviour
         //Debug.Log(home);
     }
 
+    void occupyArea(GameObject b, int radius, GameObject structure, int xPos, int yPos)
+    {
+        int diameter = (1 + 2 * radius);
+        GameObject squareToOccupy;
+        BoardSquare tempBS;
+        SpriteRenderer sr;
+        Color32 shadeColor;
+        shadeColor = new Color32(175, 175, 175, 255);
+        
+        for(int i = -radius; i<radius+1; i++)
+            for (int k = -radius; k <radius+1; k++)
+            {
+                squareToOccupy = boardTile[xPos+i, yPos+k];
+                tempBS = squareToOccupy.GetComponent<BoardSquare>();
+                if(tempBS.structure == null)
+                    tempBS.structure = structure;
+                sr = tempBS.GetComponentInParent<SpriteRenderer>();
+                sr.color = shadeColor;
+            }
+
+    }
+
     void generateRuins()
     {
         Vector3 xyPosition = new Vector3();
         //string[] ruinMaterial = { "Marble", "Granite", "Obsidian", "Limestone", "Basalt", "Brownstone", "Flagstone", "Quadratum" };
-        string[] ruinType = { "HellGate", "MuckHole"};
+        string[] ruinType = { "Hell", "Goo"};
         GameObject tempHandle;
         StructureBehavior sb;
         GameObject bt;
         BoardSquare thisSquare;
         generatorScript gs;
+        int genType = 0;
+        int genDistanceX = 0;
+        int genDistanceY = 0;
 
         for (int icount = 0; icount < startingRuins; icount++)
         {
-            
-            xyPosition.x = startingPositionX + (4 * (icount + 1));
-            xyPosition.y = startingPositionY + (4 * (icount + 1));
-            tempHandle = Instantiate(ruinsPrototype, xyPosition, Quaternion.identity) as GameObject;
+            genDistanceX = 2+ Mathf.FloorToInt(Random.value * (8 * (icount + 1)));
+            genDistanceY = 2+ Mathf.FloorToInt(Random.value * (8 * (icount + 1)));
+
+            xyPosition.x = startingPositionX + genDistanceX;
+            xyPosition.y = startingPositionY + genDistanceY;
+            //genType = Mathf.FloorToInt(Random.value * 2);
+            genType = icount % 2;
+            tempHandle = Instantiate(generators[genType], xyPosition, Quaternion.identity) as GameObject;
             sb = tempHandle.GetComponent<StructureBehavior>();
             sb.updateMaterialType("Basalt", 0);
-            sb.buildingType = "Ruin";
-            sb.buildingSubType = ruinType[0];
+            //sb.buildingType = "Ruin";
+            //sb.buildingSubType = ruinType[0];
             sb.marketValue = 0;
             sb.percentComplete = 100;
             sb.integrity = 100;
@@ -267,7 +299,9 @@ public class gameBoard : MonoBehaviour
             sb.positionX = Mathf.RoundToInt(xyPosition.x) - 1;
             sb.positionY = Mathf.RoundToInt(xyPosition.y) - 1;
             bt = boardTile[sb.positionX, sb.positionY];
+            
             thisSquare = bt.GetComponent<BoardSquare>();
+            occupyArea(bt, 1, tempHandle, sb.positionX, sb.positionY);
             if (thisSquare.structure == null)
             {
                 thisSquare.structure = tempHandle;
@@ -275,7 +309,7 @@ public class gameBoard : MonoBehaviour
             sb.homeSquare = thisSquare;
 
             gs = tempHandle.GetComponent<generatorScript>();
-            if (icount==0)
+            if (icount<2)
                 gs.isActive = true;
             else
                 gs.isActive = false;
@@ -380,7 +414,7 @@ public class gameBoard : MonoBehaviour
         {
             StructureBehavior ps_sb = ps.GetComponent<StructureBehavior>();
             ps_sb.calculateSupplyLevel();
-            ps_sb.calculateWorkerSpeed();
+            //ps_sb.calculateWorkerSpeed();
         }
     }
 
@@ -401,10 +435,10 @@ public class gameBoard : MonoBehaviour
                 terrainGenArray[i, j] = 1; //initialize to grasslands
             }
 
-        generateTerrain(terrainGenArray, .09f, 6, 6); //STONE HILLS
-        generateTerrain(terrainGenArray, .07f, 7, 4); //WATER/SWAMP
+        generateTerrain(terrainGenArray, .09f, 6, 12); //STONE HILLS
+        generateTerrain(terrainGenArray, .02f, 3, 4); //WATER/SWAMP
         generateTerrain(terrainGenArray, .15f, 2, 25); //LIGHT WOODS
-        generateTerrain(terrainGenArray, .05f, 8, 5); //WOODED HILLS
+        generateTerrain(terrainGenArray, .09f, 8, 8); //WOODED HILLS
         generateTerrain(terrainGenArray, .09f, 9, 25); //WOODS
 
 
@@ -527,13 +561,18 @@ public class gameBoard : MonoBehaviour
 
     bool checkWall(int x, int y, int i)
     {
-        GameObject tile = boardTile[x, y];
-        BoardSquare thisSquare = (BoardSquare)tile.GetComponent(typeof(BoardSquare));
-        if (thisSquare.hasWall())
+        if (x > 0 && y > 0 && x < tileSizeX && y < tileSizeY)
         {
-            if (i<2)
-                updateWall(thisSquare.structure, x, y, i);
-            return true;
+            GameObject tile = boardTile[x, y];
+            BoardSquare thisSquare = (BoardSquare)tile.GetComponent(typeof(BoardSquare));
+            if (thisSquare.hasWall())
+            {
+                if (i < 2)
+                    updateWall(thisSquare.structure, x, y, i);
+                return true;
+            }
+            else
+                return false;
         }
         else
             return false;
@@ -968,8 +1007,12 @@ public class gameBoard : MonoBehaviour
 
     void Update()
     {
-        
-        if(Input.GetKeyDown(KeyCode.Space))
+        if (enemies.Count > 0)
+            hasEnemies = true;
+        else
+            hasEnemies = false;
+
+        if (Input.GetKeyDown(KeyCode.Space))
         {
             if (isPaused)
             {

@@ -30,11 +30,11 @@ public class generatorScript : MonoBehaviour {
 
     void generateEnemy(int type)
     {
-        float newPosx = positionX + (Random.value * 1.5f) - .5f;
-        float newPosy = positionY + (Random.value * 1.5f) - .5f;
+        float newPosx = positionX + 1+(Random.value * .5f)-.25f;
+        float newPosy = positionY + 1+(Random.value * .5f)-.25f;
         //GameObject e = Instantiate(enemy[type], new Vector3(newPosx, newPosy, 1), Quaternion.identity) as GameObject;
 
-        print("Enemy@ X:"+positionX + " Y:" + positionY);
+        //print("Enemy@ X:"+positionX + " Y:" + positionY);
         GameObject e = Instantiate(enemy[type], new Vector3(newPosx, newPosy, 1), Quaternion.identity) as GameObject;        
         cgb.SendMessage("addEnemyToBoard", e);
     }
@@ -48,7 +48,7 @@ public class generatorScript : MonoBehaviour {
 	void Start () {        
         StructureBehavior bs = GetComponentInParent<StructureBehavior>();
         cgb = FindObjectOfType<gameBoard>();
-        enemy = cgb.enemyType;
+        //enemy = cgb.enemyType;
         positionX = bs.positionX;
         positionY = bs.positionY;
         pauseCounter = 0;

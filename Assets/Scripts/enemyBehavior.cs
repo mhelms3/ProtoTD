@@ -11,8 +11,10 @@ public class enemyBehavior : MonoBehaviour {
     public float damage;
     public float attackCycle;
     public float attackSpeed;
+    public float sizeOfEnemy;
 
     private SpriteRenderer healthBar;
+    public GameObject popUp;
     public float reaquireFrequency;
     public float reaquireClock = 0;
 
@@ -22,6 +24,14 @@ public class enemyBehavior : MonoBehaviour {
     public GameObject targetObject;
     public GameObject tempTarget;
     public GameObject enemyAmmo;
+
+    public string enemyType;
+    public string enemySubType;
+
+    public float resistCrush;
+    public float resistPierce;
+    public float resistFire;
+    public float resistHoly;
 
     public List<node> myPath;
     public string targetType;
@@ -48,7 +58,16 @@ public class enemyBehavior : MonoBehaviour {
             ammoScript aScript = col.gameObject.GetComponent<ammoScript>();
             float damage = Mathf.Round(Random.value * (aScript.damageUpper - aScript.damageLower) + aScript.damageLower);
             hitPoints -= damage;
-            //print("Hit for " + damage + " damage");
+
+            GameObject dText = Instantiate(popUp, transform.position , Quaternion.identity) as GameObject;
+            dText.GetComponent<numberPop>().updateText(damage.ToString("0"));
+            dText.GetComponent<numberPop>().updateColor(Color.red);
+            dText.GetComponent<numberPop>().setTextPos(transform.position); 
+
+            
+
+
+            //print("Enemy hit for " + damage + " damage");
             updateStatusBars();
             Destroy(col.gameObject);
         }
@@ -158,6 +177,7 @@ public class enemyBehavior : MonoBehaviour {
             GameObject ammo = Instantiate(enemyAmmo, startingPos, Quaternion.identity) as GameObject;
             ammoScript aScript = ammo.GetComponent<ammoScript>();
             aScript.attackTarget = targetObject;
+            aScript.updateMaxDistance(attackRange);
             aScript.isEnemyAttack = true;
             aScript.isRotating = true;
             attackCycle = attackSpeed;
@@ -187,17 +207,18 @@ public class enemyBehavior : MonoBehaviour {
         target.y = targetObject.transform.position.y;
         myPath = pfs.FindPath(new Vector2(transform.position.x, transform.position.y), target);
 
-        if (myPath.Count > 0)
+        if (myPath == null)
+            print("Path Null Problem");
+        else if (myPath.Count > 0)
             pathIsCurrent = true;
         else if (myPath.Count == 0)
             print("Path Zero Problem");
-        else if (myPath == null)
-            print("Path Null Problem");
+        
     }
 
     public void moveToTarget()
     {
-        Vector3 myTarget = new Vector3(myPath[0].positionX, myPath[0].positionY, 0);
+        Vector3 myTarget = new Vector3(myPath[0].positionX+(.5f*sizeOfEnemy), myPath[0].positionY-(.5f*sizeOfEnemy), 0);
         //Debug.Log("MyTarget:"+myTarget);
         gameObject.transform.position = Vector3.MoveTowards(transform.position, myTarget, moveSpeed*Time.deltaTime);
         if (Vector3.Distance(transform.position, myTarget)<.005)
@@ -252,6 +273,7 @@ public class enemyBehavior : MonoBehaviour {
         acquireTarget();
         pfs = GetComponentInParent<pathFindingScript>();
         isAsleep = false;
+        attackRange = attackRange + Random.value * .1f;
 
     }	
 
@@ -291,7 +313,8 @@ public class enemyBehavior : MonoBehaviour {
         if (targetObject == null && !isAsleep)
         {
             hasPath = false;
-            myPath.Clear();
+            if(myPath!=null)
+                myPath.Clear();
             acquireTarget();
             
             if (targetObject == null)
@@ -310,7 +333,7 @@ public class enemyBehavior : MonoBehaviour {
             if (!hasPath)
             {
                 findPath();
-                if (myPath.Count == 0)
+                if (myPath == null || myPath.Count == 0)
                 {
                     hasPath = false;
                     changeTargetClosest();
