@@ -432,9 +432,6 @@ public class StructureBehavior : MonoBehaviour {
             supplyLevel = 1 - ((distanceToThis - 3) / 20);
         else
             supplyLevel = .05f;
-
-        calculateWorkerSpeed();
-
     }
 
     public void calculateWorkerSpeed()
@@ -522,6 +519,10 @@ public class StructureBehavior : MonoBehaviour {
    
     private void updateButtons()
     {
+        
+        //use this to disable/enble buttons, depending on whether they are available or not according to resource availability
+        //maybe this should be a function of the button, not the building??? Probably.
+
         //gameBoard cgb = (gameBoard)FindObjectOfType(typeof(gameBoard));
         //cgb.SendMessage("updateButtonStatus", gameObject);
     }

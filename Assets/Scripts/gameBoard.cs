@@ -65,8 +65,12 @@ public class gameBoard : MonoBehaviour
     public Text playerRaceText;
     public Text playerLevelText;
 
-    public static int tileSizeX = 50;
-    public static int tileSizeY = 50;
+    public static int tileSizeX;
+    public static int tileSizeY;
+
+    public int initialSizeX;
+    public int initialSizeY;
+
     public int startingPositionX;
     public int startingPositionY;
 
@@ -414,12 +418,14 @@ public class gameBoard : MonoBehaviour
         {
             StructureBehavior ps_sb = ps.GetComponent<StructureBehavior>();
             ps_sb.calculateSupplyLevel();
-            //ps_sb.calculateWorkerSpeed();
+            ps_sb.calculateWorkerSpeed();
         }
     }
 
     void initializeGameBoard()
     {
+        tileSizeX = initialSizeX;
+        tileSizeY = initialSizeY;
         initializeTerrainDictionary();
         string tempTile;
         GameObject currentTerrain;
@@ -1049,15 +1055,15 @@ public class gameBoard : MonoBehaviour
         {
             buildWall();
         }
-        if (Input.GetKeyDown(KeyCode.Alpha2))
+        if (Input.GetKeyDown(KeyCode.Alpha4))
         {
             buildFarm();
         }
-        if (Input.GetKeyDown(KeyCode.Alpha3))
+        if (Input.GetKeyDown(KeyCode.Alpha2))
         {
             buildMine();
         }
-        if (Input.GetKeyDown(KeyCode.Alpha4))
+        if (Input.GetKeyDown(KeyCode.Alpha3))
         {
             buildMill();
         }
